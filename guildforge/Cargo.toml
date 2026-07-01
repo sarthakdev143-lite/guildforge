@@ -1,0 +1,125 @@
+# GuildForge Cargo workspace manifest.
+#
+# This is the root of the GuildForge workspace. Per-crate manifests live
+# under apps/*/Cargo.toml and crates/*/Cargo.toml. See docs/CRATE_LAYOUT.md
+# for the dependency rules and per-crate responsibilities.
+#
+# Pin every shared dependency here so every crate uses the same version.
+# Adding a new dependency to a crate: add it here first, then in the
+# crate's Cargo.toml as `dep.workspace = true`.
+
+[workspace]
+resolver = "2"
+members = [
+    "apps/cli",
+    "crates/config",
+    "crates/engine",
+    "crates/executor",
+    "crates/logging",
+    "crates/parser",
+    "crates/planner",
+    "crates/provider",
+    "crates/provider-discord",
+    "crates/shared",
+    "crates/state",
+    "crates/validation",
+]
+
+# Workspace-level package metadata. Every member crate inherits these
+# via `edition.workspace = true` etc. in its own Cargo.toml.
+[workspace.package]
+version = "0.0.1"
+edition = "2021"
+rust-version = "1.88"
+license = "MIT OR Apache-2.0"
+authors = ["GuildForge contributors"]
+repository = "https://github.com/your-org/guildforge"
+homepage = "https://github.com/your-org/guildforge"
+documentation = "https://github.com/your-org/guildforge/tree/main/docs"
+readme = "README.md"
+publish = false  # do not publish to crates.io until v0.1.0
+
+# Shared dependency versions. Pin minors to avoid surprise bumps.
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.38", features = ["full"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+async-trait = "0.1"
+futures = "0.3"
+
+# HTTP
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+
+# CLI
+clap = { version = "4.5", features = ["derive", "env", "wrap_help"] }
+
+# Errors & diagnostics
+anyhow = "1"
+thiserror = "1"
+miette = { version = "7", features = ["fancy"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "fmt"] }
+
+# Database
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio-rustls", "sqlite", "macros", "migrate"] }
+
+# Crypto / hashing
+blake3 = "1.5"
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# File locking
+fs2 = "0.4"
+
+# Internal crates (used by other workspace members)
+guildforge-shared = { path = "crates/shared", version = "0.0.1" }
+guildforge-logging = { path = "crates/logging", version = "0.0.1" }
+guildforge-config = { path = "crates/config", version = "0.0.1" }
+guildforge-parser = { path = "crates/parser", version = "0.0.1" }
+guildforge-validation = { path = "crates/validation", version = "0.0.1" }
+guildforge-state = { path = "crates/state", version = "0.0.1" }
+guildforge-provider = { path = "crates/provider", version = "0.0.1" }
+guildforge-provider-discord = { path = "crates/provider-discord", version = "0.0.1" }
+guildforge-planner = { path = "crates/planner", version = "0.0.1" }
+guildforge-executor = { path = "crates/executor", version = "0.0.1" }
+guildforge-engine = { path = "crates/engine", version = "0.0.1" }
+
+# Test-only deps (referenced from [dev-dependencies] in member crates)
+wiremock = "0.6"
+tempfile = "3"
+insta = { version = "1", features = ["yaml", "json"] }
+assert_cmd = "2"
+predicates = "3"
+pretty_assertions = "1"
+proptest = "1"
+criterion = { version = "0.5", features = ["html_reports"] }
+
+# Release profile: optimized for size and speed.
+# - LTO across crates (slower compile, smaller + faster binary)
+# - Strip debug info and symbols from the binary
+# - Single codegen unit (slower compile, better optimization)
+# - Panic = abort (smaller binary, no unwinding tables)
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
+
+# Dev profile: faster compile, larger binary.
+[profile.dev]
+opt-level = 0
+debug = true
+incremental = true
+
+# Test profile: same as dev but with overflow checks on.
+[profile.test]
+overflow-checks = true

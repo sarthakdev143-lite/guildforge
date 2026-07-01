@@ -1,0 +1,125 @@
+# GuildForge example: community.yaml
+#
+# A small open-source community guild. Simpler than company.yaml:
+# fewer roles, public read-mostly channels, a single forum for support.
+#
+# Run: guildforge validate examples/community.yaml
+
+_schema_version: 1
+
+server:
+  name: OpenWidget Community
+  description: Community guild for the OpenWidget project.
+  verification_level: low
+  explicit_content_filter: members_without_roles
+  default_notifications: only_mentions
+  system_channel: announcements
+
+roles:
+  - name: Maintainer
+    color: purple
+    hoist: true
+    mentionable: true
+    permissions:
+      - administrator
+
+  - name: Contributor
+    color: green
+    hoist: true
+    mentionable: true
+    permissions:
+      - send_messages
+      - read_message_history
+      - attach_files
+      - embed_links
+      - add_reactions
+      - create_public_threads
+      - manage_threads
+
+  - name: Member
+    color: default
+    permissions:
+      - send_messages
+      - read_message_history
+      - add_reactions
+
+categories:
+  - name: INFO
+    channels:
+      - name: announcements
+        type: announcement
+        topic: Project announcements. Read-only.
+        permissions:
+          read: [everyone]
+          write: [Maintainer]
+      - name: rules
+        type: text
+        topic: Server rules. Read-only.
+        permissions:
+          read: [everyone]
+          write: [Maintainer]
+
+  - name: SUPPORT
+    channels:
+      - name: help
+        type: forum
+        topic: Ask for help. Search first.
+        available_tags: [question, answered, faq]
+      - name: showcase
+        type: text
+        topic: Show off what you built with OpenWidget.
+
+  - name: GENERAL
+    channels:
+      - name: general
+        type: text
+        topic: General chat.
+      - name: off-topic
+        type: text
+        topic: Anything not OpenWidget.
+
+permissions:
+  help:
+    read: [everyone]
+    write: [Member, Contributor, Maintainer]
+  showcase:
+    read: [everyone]
+    write: [Member, Contributor, Maintainer]
+  general:
+    read: [everyone]
+    write: [Member, Contributor, Maintainer]
+  off-topic:
+    read: [everyone]
+    write: [Member, Contributor, Maintainer]
+
+forum_tags:
+  help:
+    - name: Question
+      emoji: "?"
+    - name: Answered
+      emoji: "?"
+      moderated: true
+    - name: FAQ
+      emoji: "?"
+      moderated: true
+
+welcome_screen:
+  enabled: true
+  description: |
+    Welcome to OpenWidget Community. Read #rules first, then head to
+    #help if you have questions.
+  channels:
+    - channel: rules
+      description: Read this first
+    - channel: help
+      description: Ask questions
+    - channel: general
+      description: General chat
+
+ordering:
+  roles: [Maintainer, Contributor, Member, everyone]
+  categories: [INFO, SUPPORT, GENERAL]
+  channels:
+    INFO: [announcements, rules]
+    SUPPORT: [help, showcase]
+    GENERAL: [general, off-topic]

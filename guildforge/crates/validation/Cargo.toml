@@ -1,0 +1,19 @@
+[package]
+name = "guildforge-validation"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Semantic validation for GuildForge config files."
+
+[dependencies]
+guildforge-config = { workspace = true }
+guildforge-shared = { workspace = true }
+thiserror = { workspace = true }
+miette = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }
+insta = { workspace = true }

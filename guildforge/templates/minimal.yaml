@@ -1,0 +1,18 @@
+# Minimal GuildForge template.
+# Copy this to ./guildforge.yaml and edit.
+
+server:
+  name: My Server
+
+roles:
+  - name: Admin
+    color: red
+    permissions: [administrator]
+
+channels:
+  - name: general
+    type: text
+    topic: General chat.
+    permissions:
+      read: [everyone]
+      write: [Admin]

@@ -1,0 +1,10 @@
+# Rust toolchain pin. CI uses this exact version.
+# Bump deliberately; never auto-update.
+#
+# Note: must be >= 1.86 because some transitive deps (e.g. icu_* v2.2)
+# require that version. MSRV is tracked separately in
+# `workspace.package.rust-version` in the root Cargo.toml.
+[toolchain]
+channel = "1.88.0"
+components = ["rustfmt", "clippy", "rust-src"]
+profile = "minimal"

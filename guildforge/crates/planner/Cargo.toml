@@ -1,0 +1,23 @@
+[package]
+name = "guildforge-planner"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Deterministic planner for GuildForge."
+
+[dependencies]
+guildforge-config = { workspace = true }
+guildforge-state = { workspace = true }
+guildforge-shared = { workspace = true }
+guildforge-provider = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }
+insta = { workspace = true }
+proptest = { workspace = true }

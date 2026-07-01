@@ -1,0 +1,49 @@
+# Rust
+/target
+**/*.rs.bk
+Cargo.lock.bak
+*.pdb
+
+# GuildForge state files (NEVER commit these — they may contain
+# webhook URLs which are secrets)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.db.bak
+*.lock
+
+# Token files (defense in depth — token should live in OS keychain)
+token
+*.token
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Node (dashboard)
+apps/dashboard/node_modules/
+apps/dashboard/.next/
+apps/dashboard/out/
+apps/dashboard/build/
+apps/dashboard/.env*.local
+apps/dashboard/npm-debug.log*
+apps/dashboard/yarn-debug.log*
+apps/dashboard/yarn-error.log*
+apps/dashboard/pnpm-debug.log*
+
+# Test artifacts
+/coverage/
+/tarpaulin-report.html
+*.profraw
+*.profdata
+
+# Snapshot files (insta) — these ARE committed, do NOT ignore
+!tests/snapshots/*.snap
+
+# CI
+/.cache/

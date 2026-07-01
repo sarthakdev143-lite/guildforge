@@ -1,0 +1,6 @@
+# Clippy config for GuildForge.
+# We treat all warnings as errors in CI (`-D warnings`); this file
+# configures which lints we additionally enable or allow.
+
+# MSRV-aware linting.
+msrv = "1.88.0"
