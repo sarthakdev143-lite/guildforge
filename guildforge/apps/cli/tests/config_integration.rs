@@ -166,8 +166,9 @@ fn nonexistent_file_exits_2() {
 
 #[test]
 fn unimplemented_command_exits_2() {
+    // `import` is still a stub in Phase 3.
     cmd()
-        .args(["plan", &example("examples/company.yaml").to_string_lossy()])
+        .args(["import", "12345"])
         .assert()
         .failure()
         .code(2)

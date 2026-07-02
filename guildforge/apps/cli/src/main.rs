@@ -1,15 +1,17 @@
 //! `guildforge` — Infrastructure as Code for Discord Workspaces.
 //!
-//! Phase 1: `validate`, `version`, and `--help` are functional. Other
-//! commands are stubs that exit 2 with "not implemented yet". See
-//! [`ROADMAP.md`](../../ROADMAP.md) for the implementation schedule.
+//! Phase 3: `validate`, `plan`, `apply`, `destroy`, `doctor`, `version`,
+//! and `--help` are functional. Other commands are stubs.
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs, clippy::all, clippy::pedantic)]
+#![allow(clippy::uninlined_format_args)]
 
 mod commands;
 
 use clap::{Parser, Subcommand};
+use guildforge_engine::Engine;
+use guildforge_provider_discord::DiscordProvider;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
@@ -91,16 +93,25 @@ pub enum Command {
     Plan {
         /// Path to the YAML config file.
         file: PathBuf,
+        /// Output format: `text` or `json`.
+        #[arg(long, default_value = "text")]
+        format: String,
     },
     /// Apply a config: plan, prompt, execute, commit state.
     Apply {
         /// Path to the YAML config file.
         file: PathBuf,
+        /// Skip interactive prompt.
+        #[arg(long)]
+        auto_approve: bool,
     },
     /// Destroy every resource described in a config.
     Destroy {
         /// Path to the YAML config file.
         file: PathBuf,
+        /// Skip interactive prompt.
+        #[arg(long)]
+        auto_approve: bool,
     },
     /// Structural diff between two config files.
     Diff {
@@ -134,35 +145,73 @@ pub enum Command {
 }
 
 /// Entry point. Returns a process exit code.
-fn main() -> ExitCode {
+#[tokio::main]
+async fn main() -> ExitCode {
     let args = Args::parse();
 
     // Initialize logging (idempotent).
     let _ = guildforge_logging::init_from_env();
 
-    match args.command {
+    match &args.command {
         Command::Version => commands::version::run(),
-        Command::Validate { file } => commands::validate::run(&file),
+        Command::Validate { file } => commands::validate::run(file),
+        Command::Plan { file, format } => {
+            let engine = match make_engine(&args).await {
+                Ok(e) => e,
+                Err(code) => return code,
+            };
+            commands::plan::run(&engine, file, format).await
+        }
+        Command::Apply { file, auto_approve } => {
+            let engine = match make_engine(&args).await {
+                Ok(e) => e,
+                Err(code) => return code,
+            };
+            commands::apply::run(&engine, file, *auto_approve).await
+        }
+        Command::Destroy { file, auto_approve } => {
+            let engine = match make_engine(&args).await {
+                Ok(e) => e,
+                Err(code) => return code,
+            };
+            commands::destroy::run(&engine, file, *auto_approve).await
+        }
+        Command::Doctor => {
+            let engine = match make_engine(&args).await {
+                Ok(e) => e,
+                Err(code) => return code,
+            };
+            commands::doctor::run(&engine).await
+        }
         Command::Init
-        | Command::Plan { .. }
-        | Command::Apply { .. }
-        | Command::Destroy { .. }
         | Command::Diff { .. }
         | Command::Import { .. }
         | Command::Export
-        | Command::Doctor
         | Command::Backup
         | Command::Restore { .. }
         | Command::Login
         | Command::Logout => {
             eprintln!(
-                "guildforge: `{}` is not implemented yet (phase 1).",
+                "guildforge: `{}` is not implemented yet (phase 3).",
                 command_name(&args.command)
             );
             eprintln!("See ROADMAP.md for the implementation schedule.");
             ExitCode::from(2)
         }
     }
+}
+
+/// Construct the engine from CLI args + environment.
+async fn make_engine(args: &Args) -> Result<Engine, ExitCode> {
+    let Ok(provider) = DiscordProvider::from_env() else {
+        eprintln!("guildforge: no bot token found");
+        eprintln!("  set GUILDFORGE_BOT_TOKEN or run `guildforge login`");
+        return Err(ExitCode::from(2));
+    };
+    Engine::open(provider, &args.state_file).await.map_err(|e| {
+        eprintln!("guildforge: could not open state file: {e}");
+        ExitCode::from(3)
+    })
 }
 
 /// Human-readable name of a subcommand.

@@ -19,6 +19,7 @@ guildforge-provider = { workspace = true }
 guildforge-logging = { workspace = true }
 guildforge-shared = { workspace = true }
 tokio = { workspace = true }
+tokio-util = { workspace = true }
 async-trait = { workspace = true }
 tracing = { workspace = true }
 anyhow = { workspace = true }

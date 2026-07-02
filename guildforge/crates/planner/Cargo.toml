@@ -18,6 +18,7 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
+serde_yaml = { workspace = true }
 pretty_assertions = { workspace = true }
 insta = { workspace = true }
 proptest = { workspace = true }

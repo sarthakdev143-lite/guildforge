@@ -1,7 +1,8 @@
 //! CLI subcommand implementations.
-//!
-//! Each subcommand lives in its own module. The `main.rs` dispatcher
-//! calls into these.
 
+pub mod apply;
+pub mod destroy;
+pub mod doctor;
+pub mod plan;
 pub mod validate;
 pub mod version;

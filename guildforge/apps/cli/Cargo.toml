@@ -14,6 +14,7 @@ path = "src/main.rs"
 
 [dependencies]
 guildforge-engine = { workspace = true }
+guildforge-executor = { workspace = true }
 guildforge-provider = { workspace = true }
 guildforge-provider-discord = { workspace = true }
 guildforge-logging = { workspace = true }

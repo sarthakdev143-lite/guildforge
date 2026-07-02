@@ -190,6 +190,12 @@ impl Hash {
         Self(blake3::hash(bytes))
     }
 
+    /// Construct a `Hash` from raw blake3 bytes.
+    #[must_use]
+    pub fn from_bytes(bytes: [u8; 32]) -> Self {
+        Self(blake3::Hash::from_bytes(bytes))
+    }
+
     /// Compute the hash of a serializable value by first serializing it
     /// to canonical JSON.
     ///

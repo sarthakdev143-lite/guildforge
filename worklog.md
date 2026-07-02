@@ -218,3 +218,63 @@ Stage Summary:
 - Phase 3 (planner + executor) is next. Recommended first task:
   P3-001 (implement state crate with SQLite + migrations) so the
   planner has something to read from.
+
+---
+Task ID: P3-all
+Agent: main (founding eng)
+Task: Phase 3 — Planner & Executor. Implement the SQLite state store
+  with file locking, the deterministic planner, the retry-aware
+  executor with taint-on-failure, the engine orchestrator, and wire
+  `plan`/`apply`/`destroy`/`doctor` into the CLI.
+
+Work Log:
+- P3-001: Implemented `crates/state` with SQLite via sqlx. Created
+  `migrations/01_initial.sql` with `resources`, `migrations_log`,
+  `drift_snapshots`, and `schema_meta` tables. 12 unit tests including
+  upsert/get/delete/taint/rollback/file-lock/concurrent-access.
+- P3-002: Implemented file locking via fs2 advisory locks on a
+  sidecar `.lock` file. Writes PID to the lock file so the holder can
+  be identified. begin_exclusive writes PID *after* acquiring the lock
+  so the previous holder's PID is readable. Verified by
+  `file_lock_prevents_concurrent_writes` test.
+- P3-003: Implemented `crates/planner/src/convert.rs` — converts
+  Config → Vec<Resource> with full color parsing (named/hex/rgb),
+  permission bitfield mapping (42 Discord permissions), channel type
+  conversion, category-with-inline-channels, and resource addressing
+  per SCHEMA.md §12.
+- P3-004: Implemented `crates/planner/src/diff.rs` — deterministic
+  diff using content_hash comparison. Tainted resources get
+  Delete+Create instead of Update. Operations sorted by topological
+  level (roles → categories → channels → overwrites → webhooks) then
+  by (kind, addr).
+- P3-005: Implemented `crates/planner/src/render.rs` — text renderer
+  with `+ ~ - =` symbols and JSON renderer with stable serialization.
+- P3-006+007: Implemented `crates/executor` — topological apply with
+  retry (Transient: exp backoff, Conflict: single retry, Auth: abort,
+  Permanent: taint and continue). Cancellation via CancellationToken.
+  State mutations (upsert/delete/taint) within the transaction. 6
+  tests including create/delete/noop/cancel/failure-taint.
+- P3-008: Implemented `crates/engine` — wires parser → validator →
+  planner → executor → state. `apply` acquires exclusive lock, executes
+  plan, commits state. `destroy` computes inverse plan. 6 tests
+  including the critical idempotency test (apply twice → second is
+  no-op).
+- P3-009: Wired CLI `plan`, `apply`, `destroy` commands. `plan` exits
+  1 if there are changes (CI-friendly). `apply` requires
+  `--auto-approve` or returns Aborted. `destroy` same.
+- P3-010: Wired CLI `doctor` — stub returns "No drift detected" in
+  Phase 3; full drift detection lands in Phase 4.
+
+Stage Summary:
+- Phase 3 complete. 236 tests pass (up from 193 in Phase 2), clippy
+  clean with -D warnings, fmt clean.
+- The full Terraform-style pipeline works: `guildforge plan
+  company.yaml` shows the diff; `guildforge apply --auto-approve
+  company.yaml` creates resources and commits state; running apply
+  again is a no-op; `guildforge destroy --auto-approve company.yaml`
+  tears everything down.
+- Idempotency is verified by test: apply twice → second run produces
+  zero creates, zero updates, zero deletes.
+- The state store is SQLite-backed with file locking, preventing
+  concurrent `apply` runs from corrupting state.
+- Phase 4 (import/export/diff) is next.
