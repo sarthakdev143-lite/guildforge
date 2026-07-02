@@ -121,7 +121,7 @@ impl Store {
     ///
     /// Returns [`StateError::LockHeld`] if another process holds any
     /// lock.
-    #[allow(clippy::unused_async)]  // Phase 0 stub; real impl awaits SQLite.
+    #[allow(clippy::unused_async)] // Phase 0 stub; real impl awaits SQLite.
     pub async fn begin_exclusive(&self) -> Result<Transaction, StateError> {
         // Phase 0 stub.
         Ok(Transaction {
@@ -151,7 +151,7 @@ impl Transaction {
     /// # Errors
     ///
     /// Returns [`StateError`] if the commit fails.
-    #[allow(clippy::unused_async)]  // Phase 0 stub; real impl awaits SQLite.
+    #[allow(clippy::unused_async)] // Phase 0 stub; real impl awaits SQLite.
     pub async fn commit(self, _new: CurrentState) -> Result<(), StateError> {
         // Phase 0 stub. Real implementation will write to SQLite in a
         // single transaction.

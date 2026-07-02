@@ -1,0 +1,10 @@
+# Broken example: voice-only fields on a text channel.
+# Should fail V061.
+
+server:
+  name: Test
+
+channels:
+  - name: voice-text-confusion
+    type: text
+    bitrate: 64000

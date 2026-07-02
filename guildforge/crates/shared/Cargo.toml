@@ -12,9 +12,9 @@ description = "Cross-crate primitives for GuildForge (ids, hashing, time)."
 blake3 = { workspace = true }
 chrono = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
-serde_json = { workspace = true }
 pretty_assertions = { workspace = true }
 proptest = { workspace = true }

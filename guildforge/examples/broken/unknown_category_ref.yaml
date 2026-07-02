@@ -1,0 +1,10 @@
+# Broken example: channel references unknown category.
+# Should fail V010.
+
+server:
+  name: Test
+
+channels:
+  - name: general
+    type: text
+    category: NOPE

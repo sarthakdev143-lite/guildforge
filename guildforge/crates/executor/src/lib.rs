@@ -150,7 +150,7 @@ impl Executor {
     /// fires, or [`ExecutorError::Permanent`] on a permanent failure
     /// (after which the executor continues with independent operations
     /// and returns the report at the end).
-    #[allow(clippy::unused_async)]  // Phase 0 stub; real impl awaits provider calls.
+    #[allow(clippy::unused_async)] // Phase 0 stub; real impl awaits provider calls.
     pub async fn execute(
         &self,
         _plan: &ExecutionPlan,

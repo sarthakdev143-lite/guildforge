@@ -12,8 +12,8 @@ description = "Semantic validation for GuildForge config files."
 guildforge-config = { workspace = true }
 guildforge-shared = { workspace = true }
 thiserror = { workspace = true }
-miette = { workspace = true }
 
 [dev-dependencies]
+serde_yaml = { workspace = true }
 pretty_assertions = { workspace = true }
 insta = { workspace = true }

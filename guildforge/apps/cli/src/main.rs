@@ -1,14 +1,13 @@
 //! `guildforge` — Infrastructure as Code for Discord Workspaces.
 //!
-//! Phase 0: this binary is a stub. Only `--help` and `--version` work.
-//! Real command implementations land phase by phase per
-//! [`ROADMAP.md`](../../ROADMAP.md).
-//!
-//! See [`docs/CLI_REFERENCE.md`](../../docs/CLI_REFERENCE.md) for the
-//! full command reference.
+//! Phase 1: `validate`, `version`, and `--help` are functional. Other
+//! commands are stubs that exit 2 with "not implemented yet". See
+//! [`ROADMAP.md`](../../ROADMAP.md) for the implementation schedule.
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs, clippy::all, clippy::pedantic)]
+
+mod commands;
 
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
@@ -16,7 +15,13 @@ use std::process::ExitCode;
 
 /// Global flags accepted by every subcommand.
 #[derive(Debug, Clone, Parser)]
-#[command(name = "guildforge", version, about, long_about = None, propagate_version = true)]
+#[command(
+    name = "guildforge",
+    version,
+    about = "Infrastructure as Code for Discord Workspaces",
+    long_about = None,
+    propagate_version = true,
+)]
 pub struct Args {
     /// Path to the `SQLite` state file.
     #[arg(
@@ -131,15 +136,14 @@ pub enum Command {
 /// Entry point. Returns a process exit code.
 fn main() -> ExitCode {
     let args = Args::parse();
+
+    // Initialize logging (idempotent).
+    let _ = guildforge_logging::init_from_env();
+
     match args.command {
-        Command::Version => {
-            println!("guildforge {}", env!("CARGO_PKG_VERSION"));
-            println!("  commit:    {}", env!("CARGO_PKG_VERSION"));
-            println!("  providers: discord={}", env!("CARGO_PKG_VERSION"));
-            ExitCode::SUCCESS
-        }
+        Command::Version => commands::version::run(),
+        Command::Validate { file } => commands::validate::run(&file),
         Command::Init
-        | Command::Validate { .. }
         | Command::Plan { .. }
         | Command::Apply { .. }
         | Command::Destroy { .. }
@@ -151,10 +155,8 @@ fn main() -> ExitCode {
         | Command::Restore { .. }
         | Command::Login
         | Command::Logout => {
-            // Phase 0 stub: every command except `version` exits 2
-            // ("not implemented yet") with a helpful message.
             eprintln!(
-                "guildforge: `{}` is not implemented yet (phase 0).",
+                "guildforge: `{}` is not implemented yet (phase 1).",
                 command_name(&args.command)
             );
             eprintln!("See ROADMAP.md for the implementation schedule.");
@@ -163,6 +165,7 @@ fn main() -> ExitCode {
     }
 }
 
+/// Human-readable name of a subcommand.
 fn command_name(c: &Command) -> &'static str {
     match c {
         Command::Init => "init",

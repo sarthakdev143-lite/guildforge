@@ -105,12 +105,24 @@ impl Engine {
     /// Returns [`EngineError::Validation`] if validation fails, or
     /// [`EngineError::Other`] for I/O or parse errors.
     pub fn validate(&self, _path: &Path) -> Result<Config> {
-        // Phase 0 stub. Real implementation lands in task P3-008.
+        // Phase 1 stub: the CLI bypasses the engine for `validate` and
+        // calls parser + validation directly. This method will be wired
+        // up in Phase 3 (task P3-008).
         Ok(Config {
             schema_version: None,
             server: guildforge_config::Server {
                 name: String::new(),
                 description: None,
+                icon: None,
+                banner: None,
+                verification_level: None,
+                explicit_content_filter: None,
+                default_notifications: None,
+                system_channel: None,
+                system_channel_flags: vec![],
+                afk_channel: None,
+                afk_timeout: None,
+                premium_progress_bar: None,
             },
             roles: vec![],
             categories: vec![],
@@ -131,7 +143,7 @@ impl Engine {
     /// # Errors
     ///
     /// Returns [`EngineError`] on validation, state, or planner errors.
-    #[allow(clippy::unused_async)]  // Phase 0 stub.
+    #[allow(clippy::unused_async)] // Phase 0 stub.
     pub async fn plan(&self, _path: &Path) -> Result<ExecutionPlan> {
         // Phase 0 stub.
         Ok(ExecutionPlan::default())
@@ -144,7 +156,7 @@ impl Engine {
     ///
     /// Returns [`EngineError`] on any failure. Partial failures return
     /// a non-zero code via the CLI's exit-code mapping.
-    #[allow(clippy::unused_async)]  // Phase 0 stub.
+    #[allow(clippy::unused_async)] // Phase 0 stub.
     pub async fn apply(&self, _path: &Path, _auto_approve: bool) -> Result<ExecutionReport> {
         // Phase 0 stub.
         Ok(ExecutionReport::default())
@@ -156,7 +168,7 @@ impl Engine {
     /// # Errors
     ///
     /// Returns [`EngineError`] on any failure.
-    #[allow(clippy::unused_async)]  // Phase 0 stub.
+    #[allow(clippy::unused_async)] // Phase 0 stub.
     pub async fn destroy(&self, _path: &Path, _auto_approve: bool) -> Result<ExecutionReport> {
         // Phase 0 stub.
         Ok(ExecutionReport::default())
@@ -167,7 +179,7 @@ impl Engine {
     /// # Errors
     ///
     /// Returns [`EngineError`] on state or provider errors.
-    #[allow(clippy::unused_async)]  // Phase 0 stub.
+    #[allow(clippy::unused_async)] // Phase 0 stub.
     pub async fn doctor(&self) -> Result<DriftReport> {
         // Phase 0 stub.
         Ok(DriftReport::default())
