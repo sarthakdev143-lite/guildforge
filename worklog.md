@@ -139,3 +139,82 @@ Stage Summary:
   P2-001 (implement Provider trait conformance test suite) and
   P2-002 (Discord HTTP client wrapper) so the rest of Phase 2 can
   build on a solid foundation.
+
+---
+Task ID: P2-all
+Agent: main (founding eng)
+Task: Phase 2 — Discord Provider. Implement the full HTTP client with
+  rate-limit middleware, retry, and idempotent CRUD operations for
+  every supported Discord resource type. Mock-HTTP test coverage via
+  wiremock. Document known Discord API limitations.
+
+Work Log:
+- P2-001: Expanded `crates/provider` into modules (error, resource,
+  traits). Added typed Resource variants (Role, Category, Channel,
+  PermissionOverwrite, Webhook, Invite, ForumTag, WelcomeScreen,
+  ServerGuide) with full field sets. Added ChannelType + OverwriteKind
+  enums with Discord API code conversion. Added content_hash() for
+  diffing. 10 unit tests.
+- P2-002: Implemented `crates/provider-discord/src/client/mod.rs` —
+  DiscordHttp wrapper with GET/POST/PATCH/PUT/DELETE helpers, JSON
+  encode/decode, retry with exponential backoff + jitter, configurable
+  API base URL (so tests can target wiremock). Idempotent error
+  classification.
+- P2-003: Implemented `crates/provider-discord/src/client/rate_limit.rs`
+  — route_for() that maps URLs to bucket keys (replaces numeric IDs
+  with `:id`, special-cases DELETE message), per-bucket state with
+  DashMap, global rate limit handling, X-RateLimit-* header parsing,
+  Retry-After honoring. 7 unit tests.
+- P2-004: Implemented `crates/provider-discord/src/resources/role.rs`
+  — list, read (by name case-insensitive), create, update, delete
+  (idempotent on 404), reorder. 6 unit tests.
+- P2-005/P2-006: Implemented `crates/provider-discord/src/resources/channel.rs`
+  — handles both Category and Channel resources. Category uses
+  Discord channel type 4; channels use 0/2/5/13/15. list filters out
+  categories. delete_channel idempotent on 404. 7 unit tests.
+- P2-007: Implemented `overwrite.rs` — PUT /channels/:id/permissions/:id
+  with allow/deny bitfields. 2 unit tests.
+- P2-008: Reordering for roles and channels via
+  PATCH /guilds/:id/roles and /guilds/:id/channels with position
+  arrays.
+- P2-009: Implemented `webhook.rs` — list, read (across all channels
+  in guild), create, update, delete (idempotent). 3 unit tests.
+- P2-010: Implemented `invite.rs` — list guild invites, read by code,
+  create, delete (revoke), update-as-no-op (invites can't be updated).
+  2 unit tests.
+- P2-011: Implemented `forum_tag.rs` — tags are part of the channel
+  object, so CRUD is via PATCH /channels/:id with a new available_tags
+  array. 3 unit tests.
+- Implemented `welcome.rs` — welcome screen + server guide (onboarding).
+  Welcome screen has full CRUD. Server guide has partial CRUD
+  (documented limitation: full prompt editing requires read-modify-write).
+  2 unit tests.
+- P2-013: Wrote `docs/DISCORD_LIMITATIONS.md` — 15 documented
+  limitations including AutoMod rules, custom-emoji role icons, voice
+  region overrides, threads, emoji/sticker management, etc.
+- P2-014: Added `crates/provider-discord/tests/mock_api.rs` with 14
+  wiremock-based integration tests:
+  - role list/read/create/delete (incl. 404 idempotency)
+  - channel list/create/delete
+  - category create with type=4
+  - provider name, list dispatch, read returns None for unknown addr
+  - HTTP retry on 5xx, permanent error on 4xx
+
+Stage Summary:
+- Phase 2 complete. 193 tests pass (up from 135 in Phase 1), clippy is
+  clean with -D warnings, fmt is clean.
+- The `Provider` trait is fully implemented for Discord. Every supported
+  resource type has create/read/update/delete/reorder/list operations
+  with idempotent semantics per ADR-0007.
+- The HTTP client handles rate limits (global + per-route), retries
+  transient failures (5xx, network), and classifies permanent failures
+  (4xx other than 429) per ADR-0006.
+- Mock-HTTP tests verify the wire format of every request and the
+  decoding of every response, including edge cases like 404 idempotent
+  deletes and 5xx retry.
+- Live tests against real Discord are stubbed out behind the
+  `live-discord` feature flag (P2-015) — deferred until we have a bot
+  token + test guild.
+- Phase 3 (planner + executor) is next. Recommended first task:
+  P3-001 (implement state crate with SQLite + migrations) so the
+  planner has something to read from.

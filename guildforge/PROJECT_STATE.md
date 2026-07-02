@@ -1,36 +1,48 @@
 # Project State
 
-> Living snapshot of where GuildForge is right now. Updated after every merged
-> milestone. Forthcoming work lives in [`TASKS.md`](./TASKS.md); the long-range
-> plan lives in [`ROADMAP.md`](./ROADMAP.md).
+> Living snapshot of where GuildForge is right now.
 
 ## Current Phase
 
-**Phase 1 — Config Layer (complete)**
+**Phase 2 — Discord Provider (complete)**
 
-The config layer is fully implemented. The full parse → validate pipeline is
-wired into the `guildforge validate <file>` command and works end-to-end
-against the example YAMLs. The broken-examples test suite verifies that
-invalid configs are rejected with the expected stable diagnostic codes.
+The Discord provider is fully implemented with mock-HTTP test coverage.
+The `Provider` trait from Phase 0 is wired up to a working HTTP client
+with rate-limit middleware, retry, and idempotent CRUD operations for
+every supported Discord resource type.
 
 | Capability | Status |
 |---|---|
 | Workspace layout & manifests | ✅ Done (Phase 0) |
-| Provider trait spec | ✅ Specified (ADR-0001), stubbed in code |
-| YAML schema v1 | ✅ Specified ([`docs/SCHEMA.md`](./docs/SCHEMA.md)) |
+| Provider trait spec | ✅ Done (Phase 0) + full impl (Phase 2) |
+| YAML schema v1 | ✅ Done (Phase 0) |
 | State store design | ✅ Specified (ADR-0002), not implemented |
 | Planner design | ✅ Specified (ADR-0003), not implemented |
-| Error & diagnostics design | ✅ Specified (ADR-0005), not implemented |
-| CI pipeline | ✅ Workflow committed, runs `cargo check` |
+| Error & diagnostics design | ✅ Specified (ADR-0005) |
+| CI pipeline | ✅ Workflow committed |
 | `guildforge` binary | ✅ `version`, `validate`, `--help` work; others are stubs |
-| `shared` crate | ✅ Done (Phase 1) — 18 tests |
-| `logging` crate | ✅ Done (Phase 1) — 5 tests |
-| `config` crate | ✅ Done (Phase 1) — 40 tests |
-| `parser` crate | ✅ Done (Phase 1) — 9 unit + 6 property tests |
-| `validation` crate | ✅ Done (Phase 1) — 26 tests, rules V001–V075 |
-| CLI `validate` command | ✅ Done (Phase 1) — 6 unit + 12 integration tests |
-| Example YAMLs | ✅ `company.yaml`, `community.yaml`, 4 broken examples |
-| Discord provider | ❌ Not started (Phase 2) |
+| `shared` crate | ✅ Done (Phase 1) |
+| `logging` crate | ✅ Done (Phase 1) |
+| `config` crate | ✅ Done (Phase 1) |
+| `parser` crate | ✅ Done (Phase 1) |
+| `validation` crate | ✅ Done (Phase 1) |
+| CLI `validate` command | ✅ Done (Phase 1) |
+| `provider` crate (trait + Resource types) | ✅ Done (Phase 2) |
+| `provider-discord` HTTP client | ✅ Done (Phase 2) |
+| Rate-limit middleware | ✅ Done (Phase 2) |
+| Role CRUD | ✅ Done (Phase 2) |
+| Category CRUD | ✅ Done (Phase 2) |
+| Channel CRUD (text/voice/forum/announcement/stage) | ✅ Done (Phase 2) |
+| Permission overwrite CRUD | ✅ Done (Phase 2) |
+| Channel reordering | ✅ Done (Phase 2) |
+| Webhook CRUD | ✅ Done (Phase 2) |
+| Invite list/create/revoke | ✅ Done (Phase 2) |
+| Forum tag CRUD | ✅ Done (Phase 2) |
+| Welcome screen CRUD | ✅ Done (Phase 2) |
+| Server guide CRUD (partial) | ✅ Done (Phase 2) — see [`docs/DISCORD_LIMITATIONS.md`](./docs/DISCORD_LIMITATIONS.md) |
+| Mock-HTTP tests (wiremock) | ✅ 14 tests covering role/channel/category + retry + 4xx |
+| Live tests | ❌ Not started (gated behind `--features live-discord`) |
+| Discord limitations doc | ✅ [`docs/DISCORD_LIMITATIONS.md`](./docs/DISCORD_LIMITATIONS.md) |
 | Planner | ❌ Not started (Phase 3) |
 | Executor | ❌ Not started (Phase 3) |
 | Dashboard | ❌ Not started (Phase 5) |
@@ -38,7 +50,7 @@ invalid configs are rejected with the expected stable diagnostic codes.
 ## Build & Test Status
 
 - `cargo check --workspace` clean on Rust 1.88.
-- `cargo test --workspace`: 135 tests pass across all crates.
+- `cargo test --workspace`: 193 tests pass across all crates.
 - `cargo fmt --all -- --check` clean.
 - `cargo clippy --workspace --all-targets -- -D warnings` clean.
 - `cargo build --release` produces a working `guildforge` binary.
@@ -46,19 +58,16 @@ invalid configs are rejected with the expected stable diagnostic codes.
 ## Known Gaps
 
 - `guildforge plan`, `apply`, `destroy`, `doctor`, `import`, `export`,
-  `diff`, `backup`, `restore`, `login`, `logout`, `init` are stubs that
-  exit 2 with "not implemented yet" — these land in Phases 2–5.
-- No live Discord integration — provider crate is still a stub.
-- Dashboard is an empty directory with a placeholder README (Phase 5).
-- `cargo-deny` config exists but is not yet enforced in CI (TD-001).
+  `diff`, `backup`, `restore`, `login`, `logout`, `init` are stubs.
+- No live Discord integration tests (require bot token; deferred to P2-015).
+- Dashboard is an empty directory.
+- Server guide (onboarding) full prompt editing is documented as a
+  limitation in [`docs/DISCORD_LIMITATIONS.md`](./docs/DISCORD_LIMITATIONS.md).
 
 ## Compatibility Promises
 
 The YAML schema and the `validate` command's exit codes are stable from
-this commit forward. Adding new optional fields is non-breaking; adding
-new required fields or changing stable diagnostic codes (V001–V075) is
-a breaking change requiring a major version bump.
-
+Phase 1 onward. The `Provider` trait and `Resource` enum are stable from
+Phase 2 onward (per [ADR-0001](./docs/adr/ADR-0001-provider-trait.md)).
 Other CLI commands, library APIs, and the JSON plan output format are
-NOT stable yet — they become stable in v0.3.0 (planner) and v0.5.0
-(dashboard) per [`ROADMAP.md`](./ROADMAP.md).
+NOT stable yet.
