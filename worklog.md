@@ -321,3 +321,58 @@ Stage Summary:
 - `doctor` now detects drift: resources in state that are missing or
   changed in live Discord are reported.
 - Phase 5 (dashboard) is next.
+
+---
+Task ID: P5-all
+Agent: main (founding eng)
+Task: Phase 5 — Dashboard. Scaffold a Next.js 16 + Tailwind 4 web UI
+  that shells out to the `guildforge` CLI per ADR-0008. Implement
+  token storage, session auth, API routes, and UI pages.
+
+Work Log:
+- P5-001: Scaffolded Next.js 16 app in apps/dashboard/ with TypeScript,
+  Tailwind CSS 4, dark theme. Created package.json, tsconfig.json,
+  next.config.ts, postcss.config.mjs, globals.css.
+- P5-002: Implemented token storage in src/lib/cli.ts — AES-256-GCM
+  encrypted file at ~/.config/guildforge/token.enc. Key derived from
+  machine ID via scrypt. Token NEVER appears in browser-visible code.
+  Phase 6 will replace this with OS keychain via `keyring` crate.
+- P5-003: Implemented 9 API routes:
+  - POST /api/validate — shells out to `guildforge validate`
+  - POST /api/plan — shells out to `guildforge plan --format json`
+  - POST /api/apply — SSE stream of `guildforge apply --auto-approve`
+  - POST /api/login — passphrase + token storage
+  - POST /api/logout — clear session + delete token
+  - GET /api/doctor — run drift detection
+  - GET /api/version — get version info
+  - GET /api/export — export state as YAML
+  - GET /api/history — export state for history view
+- P5-004: Implemented session in src/lib/session.ts — passphrase
+  auth via GUILDFORGE_DASHBOARD_PASS env var, httpOnly cookie, 7-day
+  expiry. Auth disabled if no passphrase configured (dev mode).
+- P5-005: Implemented main dashboard page (src/app/page.tsx) — split
+  layout with YAML editor (left) and plan/validation output (right).
+  Validate, Plan, and Apply buttons. Plan viewer shows operations
+  with +/~/-/= symbols and color coding.
+- P5-006: Implemented apply with SSE streaming — the /api/apply route
+  spawns `guildforge apply --auto-approve` and streams stdout/stderr
+  as Server-Sent Events. The browser receives real-time progress.
+- P5-007: Implemented history page (src/app/history/page.tsx) — shows
+  exported state YAML.
+- P5-008: Verified `npx next build` succeeds — 14 routes compile.
+  Rust workspace remains green: 250 tests, clippy clean, fmt clean.
+
+Stage Summary:
+- Phase 5 complete. The dashboard builds successfully with 14 routes.
+  Rust workspace remains at 250 tests, clippy clean, fmt clean.
+- The dashboard is a thin shell over the CLI per ADR-0008. Every
+  operation spawns `guildforge` as a subprocess. The bot token is
+  passed via GUILDFORGE_BOT_TOKEN env var and never appears in
+  process arguments (visible via `ps`).
+- The apply page uses Server-Sent Events for real-time log streaming.
+  The browser receives stdout/stderr lines as they arrive.
+- Token storage is AES-256-GCM encrypted at rest. Phase 6 will replace
+  this with the OS keychain via the `keyring` Rust crate.
+- Phase 6 (polish & 1.0) is next: cross-compile release binaries,
+  Homebrew/scoop, man pages, shell completions, keychain integration,
+  E2E tests, performance, security review, 1.0 release.
