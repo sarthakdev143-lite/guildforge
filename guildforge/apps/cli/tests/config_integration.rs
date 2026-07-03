@@ -165,14 +165,14 @@ fn nonexistent_file_exits_2() {
 }
 
 #[test]
-fn unimplemented_command_exits_2() {
-    // `init` is still a stub in Phase 4.
+fn help_works() {
+    // All commands are implemented in Phase 6, so we just verify
+    // `--help` works.
     cmd()
-        .args(["init"])
+        .arg("--help")
         .assert()
-        .failure()
-        .code(2)
-        .stderr(predicate::str::contains("not implemented yet"));
+        .success()
+        .stdout(predicate::str::contains("guildforge"));
 }
 
 #[test]

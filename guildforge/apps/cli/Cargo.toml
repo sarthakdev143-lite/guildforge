@@ -26,12 +26,15 @@ guildforge-planner = { workspace = true }
 guildforge-state = { workspace = true }
 tokio = { workspace = true }
 clap = { workspace = true }
+clap_complete = { workspace = true }
 anyhow = { workspace = true }
 miette = { workspace = true }
 tracing = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_yaml = { workspace = true }
+rpassword = "7"
+atty = "0.2"
 
 [dev-dependencies]
 assert_cmd = { workspace = true }

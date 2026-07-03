@@ -5,7 +5,11 @@
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs, clippy::all, clippy::pedantic)]
-#![allow(clippy::uninlined_format_args)]
+#![allow(
+    clippy::uninlined_format_args,
+    clippy::doc_markdown,
+    clippy::missing_errors_doc
+)]
 
 mod commands;
 
@@ -83,7 +87,14 @@ pub struct Args {
 #[derive(Debug, Clone, Subcommand)]
 pub enum Command {
     /// Scaffold a new `guildforge.yaml` in the current directory.
-    Init,
+    Init {
+        /// Template to use: `minimal`, `company`, or `community`.
+        #[arg(long, default_value = "minimal")]
+        template: String,
+        /// Overwrite existing `guildforge.yaml`.
+        #[arg(long)]
+        force: bool,
+    },
     /// Parse and validate a config file.
     Validate {
         /// Path to the YAML config file.
@@ -142,6 +153,28 @@ pub enum Command {
     Logout,
     /// Print version, build info, and linked provider versions.
     Version,
+    /// Generate shell completions.
+    Completions {
+        /// Shell to generate completions for.
+        #[arg(value_enum)]
+        shell: Shell,
+    },
+}
+
+/// Supported shells for completions.
+#[derive(Debug, Clone, Copy, clap::ValueEnum)]
+#[value(rename_all = "lowercase")]
+pub enum Shell {
+    /// Bash.
+    Bash,
+    /// Zsh.
+    Zsh,
+    /// Fish.
+    Fish,
+    /// PowerShell.
+    Powershell,
+    /// Elvish.
+    Elvish,
 }
 
 /// Entry point. Returns a process exit code.
@@ -217,13 +250,23 @@ async fn main() -> ExitCode {
             };
             commands::restore::run(&engine, backup)
         }
-        Command::Init | Command::Login | Command::Logout => {
-            eprintln!(
-                "guildforge: `{}` is not implemented yet (phase 4).",
-                command_name(&args.command)
-            );
-            eprintln!("See ROADMAP.md for the implementation schedule.");
-            ExitCode::from(2)
+        Command::Init { template, force } => commands::init::run(template, *force),
+        Command::Login => commands::login::run(args.token_file.as_deref()),
+        Command::Logout => commands::logout::run(),
+        Command::Completions { shell } => {
+            use clap::CommandFactory;
+            use clap_complete::Shell as ClapShell;
+            let mut cmd = Args::command();
+            let bin_name = "guildforge";
+            let shell = match shell {
+                Shell::Bash => ClapShell::Bash,
+                Shell::Zsh => ClapShell::Zsh,
+                Shell::Fish => ClapShell::Fish,
+                Shell::Powershell => ClapShell::PowerShell,
+                Shell::Elvish => ClapShell::Elvish,
+            };
+            clap_complete::generate(shell, &mut cmd, bin_name, &mut std::io::stdout());
+            ExitCode::SUCCESS
         }
     }
 }
@@ -242,9 +285,10 @@ async fn make_engine(args: &Args) -> Result<Engine, ExitCode> {
 }
 
 /// Human-readable name of a subcommand.
+#[allow(dead_code)]
 fn command_name(c: &Command) -> &'static str {
     match c {
-        Command::Init => "init",
+        Command::Init { .. } => "init",
         Command::Validate { .. } => "validate",
         Command::Plan { .. } => "plan",
         Command::Apply { .. } => "apply",
@@ -258,5 +302,6 @@ fn command_name(c: &Command) -> &'static str {
         Command::Login => "login",
         Command::Logout => "logout",
         Command::Version => "version",
+        Command::Completions { .. } => "completions",
     }
 }
