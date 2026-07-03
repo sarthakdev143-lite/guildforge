@@ -183,16 +183,43 @@ async fn main() -> ExitCode {
             };
             commands::doctor::run(&engine).await
         }
-        Command::Init
-        | Command::Diff { .. }
-        | Command::Import { .. }
-        | Command::Export
-        | Command::Backup
-        | Command::Restore { .. }
-        | Command::Login
-        | Command::Logout => {
+        Command::Diff { a, b } => commands::diff::run(a, b),
+        Command::Import { guild_id } => {
+            let engine = match make_engine(&args).await {
+                Ok(e) => e,
+                Err(code) => return code,
+            };
+            commands::import::run(&engine, guild_id).await
+        }
+        Command::Export => {
+            let engine = match make_engine(&args).await {
+                Ok(e) => e,
+                Err(code) => return code,
+            };
+            commands::export::run(&engine).await
+        }
+        Command::Backup => {
+            let dest = args
+                .state_file
+                .with_extension("db.bak")
+                .to_string_lossy()
+                .to_string();
+            let engine = match make_engine(&args).await {
+                Ok(e) => e,
+                Err(code) => return code,
+            };
+            commands::backup::run(&engine, std::path::Path::new(&dest))
+        }
+        Command::Restore { backup } => {
+            let engine = match make_engine(&args).await {
+                Ok(e) => e,
+                Err(code) => return code,
+            };
+            commands::restore::run(&engine, backup)
+        }
+        Command::Init | Command::Login | Command::Logout => {
             eprintln!(
-                "guildforge: `{}` is not implemented yet (phase 3).",
+                "guildforge: `{}` is not implemented yet (phase 4).",
                 command_name(&args.command)
             );
             eprintln!("See ROADMAP.md for the implementation schedule.");

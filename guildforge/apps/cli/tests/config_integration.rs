@@ -166,11 +166,40 @@ fn nonexistent_file_exits_2() {
 
 #[test]
 fn unimplemented_command_exits_2() {
-    // `import` is still a stub in Phase 3.
+    // `init` is still a stub in Phase 4.
     cmd()
-        .args(["import", "12345"])
+        .args(["init"])
         .assert()
         .failure()
         .code(2)
         .stderr(predicate::str::contains("not implemented yet"));
+}
+
+#[test]
+fn diff_identical_configs_exits_0() {
+    let path = example("examples/company.yaml");
+    cmd()
+        .args(["diff", &path.to_string_lossy(), &path.to_string_lossy()])
+        .assert()
+        .success();
+}
+
+#[test]
+fn diff_different_configs_exits_1() {
+    let a = example("examples/company.yaml");
+    let b = example("examples/community.yaml");
+    cmd()
+        .args(["diff", &a.to_string_lossy(), &b.to_string_lossy()])
+        .assert()
+        .failure()
+        .code(1);
+}
+
+#[test]
+fn diff_nonexistent_file_exits_3() {
+    cmd()
+        .args(["diff", "/nonexistent/a.yaml", "/nonexistent/b.yaml"])
+        .assert()
+        .failure()
+        .code(3);
 }

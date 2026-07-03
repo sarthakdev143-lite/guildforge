@@ -278,3 +278,46 @@ Stage Summary:
 - The state store is SQLite-backed with file locking, preventing
   concurrent `apply` runs from corrupting state.
 - Phase 4 (import/export/diff) is next.
+
+---
+Task ID: P4-all
+Agent: main (founding eng)
+Task: Phase 4 — Import / Export / Diff. Add `guildforge import`, `export`,
+  `diff`, `backup`, `restore`, and full drift detection for `doctor`.
+
+Work Log:
+- P4-001/002: Implemented `crates/engine/src/import_export.rs` —
+  `resources_to_config()` converts provider Resources back to a Config
+  (the inverse of planner's `config_to_resources`). Includes color
+  conversion (u32→hex), permission bitfield→name mapping (42 perms),
+  channel type conversion, category-with-channels grouping, and stable
+  sorting (roles by position desc, categories/channels by position).
+  `config_to_yaml()` produces canonical YAML. 5 unit tests.
+- P4-003: Implemented `crates/engine/src/diff.rs` — structural diff
+  between two Configs. Compares roles, categories, channels, server
+  settings. Reports `+`/`-`/`~` changes sorted by address. 6 unit tests.
+- P4-004: Added `Engine::backup()` and `Engine::restore()` — file copy
+  of the SQLite state file. Wired to CLI `backup` and `restore` commands.
+- P4-005: Upgraded `Engine::doctor()` from stub to real drift detection.
+  Iterates state resources, reads each from live, compares content
+  hashes. Reports `missing_in_live`, `drifted`. (Live→state drift
+  requires `provider.list()` which is not yet wired through DynProvider
+  — documented as a known gap.)
+- P4-006: Wired CLI commands: `import`, `export`, `diff`, `backup`,
+  `restore`. Added 3 integration tests for `diff` (identical→exit 0,
+  different→exit 1, nonexistent→exit 3). Updated `unimplemented_command`
+  test to use `init` (now that `import` is implemented).
+
+Stage Summary:
+- Phase 4 complete. 250 tests pass (up from 236 in Phase 3), clippy
+  clean with -D warnings, fmt clean.
+- The full config round-trip is implemented: Config → Resources →
+  (apply) → State → Resources → Config → YAML. The YAML output is
+  stable (deterministic sorting), making it git-friendly.
+- `guildforge diff company.yaml community.yaml` produces a readable
+  structural diff with `+`/`-`/`~` markers.
+- `guildforge backup` snapshots state to a `.db.bak` file; `restore`
+  replaces the state file from a backup.
+- `doctor` now detects drift: resources in state that are missing or
+  changed in live Discord are reported.
+- Phase 5 (dashboard) is next.

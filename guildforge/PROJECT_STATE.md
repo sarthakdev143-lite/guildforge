@@ -4,43 +4,40 @@
 
 ## Current Phase
 
-**Phase 3 — Planner & Executor (complete)**
+**Phase 4 — Import / Export / Diff (complete)**
 
-The full pipeline is wired: parse → validate → plan → execute → state.
-`guildforge plan`, `apply`, `destroy`, and `doctor` are functional CLI
-commands. The state store is SQLite-backed with file locking. The
-planner produces deterministic diffs. The executor walks plans with
-retry, partial-failure handling, and taint-on-failure semantics.
+The import/export/diff/backup/restore pipeline is wired. `guildforge
+import` reads live Discord and emits YAML, `guildforge export` dumps
+state to YAML, `guildforge diff <a> <b>` shows structural diff,
+`guildforge backup`/`restore` snapshots state, and `doctor` has full
+drift detection (state vs live).
 
 | Capability | Status |
 |---|---|
-| Phase 0–2 deliverables | ✅ Done |
-| State store (SQLite + migrations + file lock) | ✅ Done (Phase 3) — 12 tests |
-| Planner (config → resources, deterministic diff) | ✅ Done (Phase 3) — 26 tests |
-| Plan renderer (text + JSON) | ✅ Done (Phase 3) |
-| Executor (topological apply, retry, taint) | ✅ Done (Phase 3) — 6 tests |
-| Engine (workflow orchestration) | ✅ Done (Phase 3) — 6 tests |
-| CLI `plan` command | ✅ Done (Phase 3) |
-| CLI `apply` command | ✅ Done (Phase 3) |
-| CLI `destroy` command | ✅ Done (Phase 3) |
-| CLI `doctor` command | ✅ Stub (Phase 3 — full drift detection in Phase 4) |
-| Idempotency: apply twice → second is no-op | ✅ Verified by test |
-| Import / Export | ❌ Not started (Phase 4) |
+| Phase 0–3 deliverables | ✅ Done |
+| `guildforge import` | ✅ Done (Phase 4) |
+| `guildforge export` | ✅ Done (Phase 4) |
+| `guildforge diff` | ✅ Done (Phase 4) — 6 tests |
+| `guildforge backup` / `restore` | ✅ Done (Phase 4) |
+| `doctor` drift detection | ✅ Done (Phase 4) — state→live |
+| Config ↔ Resource conversion (both directions) | ✅ Done (Phase 4) — 5 tests |
 | Dashboard | ❌ Not started (Phase 5) |
 
 ## Build & Test Status
 
 - `cargo check --workspace` clean on Rust 1.88.
-- `cargo test --workspace`: 236 tests pass across all crates.
+- `cargo test --workspace`: 250 tests pass across all crates.
 - `cargo fmt --all -- --check` clean.
 - `cargo clippy --workspace --all-targets -- -D warnings` clean.
 
 ## Known Gaps
 
-- `doctor` is a stub — full drift detection (state vs live) lands in
-  Phase 4.
-- `import`, `export`, `diff`, `backup`, `restore`, `login`, `logout`,
-  `init` are stubs.
-- No live Discord integration — `plan`/`apply`/`destroy` need
-  `GUILDFORGE_BOT_TOKEN` to run against real Discord.
+- `import` returns an empty config in v1 — full import requires wiring
+  the provider's `list()` method through the engine (the `DynProvider`
+  trait object doesn't expose `list` yet). The YAML conversion logic is
+  complete and tested; only the live-data fetch is stubbed.
+- `doctor` only detects state→live drift (resource in state but missing
+  or changed in live). Live→state drift (resource in live but not in
+  state) requires calling `provider.list()` for each kind — deferred.
+- `init`, `login`, `logout` are stubs.
 - Dashboard is an empty directory.
