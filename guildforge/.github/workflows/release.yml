@@ -1,0 +1,118 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build
+        run: cargo build --release -p guildforge
+      - name: Package
+        shell: pwsh
+        run: |
+          $DIR = "guildforge-windows-x86_64"
+          New-Item -ItemType Directory -Force -Path "$DIR/bin"
+          Copy-Item "target/release/guildforge.exe" "$DIR/bin/"
+          Copy-Item "README.md" "$DIR/"
+          Compress-Archive -Path "$DIR" -DestinationPath "$DIR.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: "*.zip"
+
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build
+        run: cargo build --release -p guildforge
+      - name: Package
+        run: |
+          DIR=guildforge-linux-x86_64
+          mkdir -p $DIR/bin
+          cp target/release/guildforge $DIR/bin/
+          cp README.md LICENSE-MIT LICENSE-APACHE $DIR/
+          tar czf $DIR.tar.gz $DIR
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: "*.tar.gz"
+
+  build-macos:
+    name: Build macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build
+        run: cargo build --release -p guildforge
+      - name: Package
+        run: |
+          DIR=guildforge-macos-x86_64
+          mkdir -p $DIR/bin
+          cp target/release/guildforge $DIR/bin/
+          cp README.md LICENSE-MIT LICENSE-APACHE $DIR/
+          tar czf $DIR.tar.gz $DIR
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: "*.tar.gz"
+
+  release:
+    name: Create Release
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+
+      - name: List files
+        run: find assets -type f
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "GuildForge ${{ github.ref_name }}"
+          body: |
+            # GuildForge ${{ github.ref_name }}
+            
+            Infrastructure as Code for Discord Workspaces.
+            
+            ## Download
+            
+            - **Windows**: `guildforge-windows-x86_64.zip` — extract and run `bin/guildforge.exe`
+            - **Linux**: `guildforge-linux-x86_64.tar.gz` — extract and run `./bin/guildforge`
+            - **macOS**: `guildforge-macos-x86_64.tar.gz` — extract and run `./bin/guildforge`
+            
+            ## Quick Start
+            
+            ```
+            guildforge init --template minimal
+            guildforge validate guildforge.yaml
+            guildforge login
+            guildforge plan guildforge.yaml
+            guildforge apply --auto-approve guildforge.yaml
+            ```
+          files: |
+            assets/**/*.zip
+            assets/**/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

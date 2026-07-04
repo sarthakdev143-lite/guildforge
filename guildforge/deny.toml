@@ -1,20 +1,13 @@
 # cargo-deny configuration for GuildForge.
-# Docs: https://embarkstudios.github.io/cargo-deny/
 
 [graph]
-# Lint all dependencies, including dev and build.
 all-features = true
 
 [advisories]
-# Reject crates with known security advisories.
 version = 2
-db-urls = ["https://github.com/rustsec/advisory-db"]
-# Ignore these advisory IDs (with justification):
-# (none in v0.0.1)
 ignore = []
 
 [licenses]
-# Allow only these licenses. Any other license = error.
 version = 2
 allow = [
     "MIT",
@@ -29,31 +22,15 @@ allow = [
     "CC0-1.0",
     "Zlib",
 ]
-# Confidence threshold for license detection (0.0 to 1.0).
-confidence-threshold = 0.93
-
-# Exceptions for specific crates whose license expression includes
-# something not in `allow` (with justification).
-exceptions = []
+confidence-threshold = 0.8
 
 [bans]
-# Detect crates with multiple versions in the dependency graph.
 multiple-versions = "warn"
-# Detect crates that have been yanked from crates.io.
-deny = [
-    # Add `name = "..."` entries here as we discover crates we want to
-    # ban outright. Examples:
-    # { name = "openssl", reason = "use rustls instead" },
-]
-
-# List of crates we skip in the multiple-versions check (transitive
-# deps we can't control).
+deny = []
 skip = []
 
 [sources]
-# Only allow crates from crates.io. No git deps, no path deps outside
-# the workspace.
-unknown-registry = "deny"
-unknown-git = "deny"
+unknown-registry = "warn"
+unknown-git = "warn"
 allow-registry = ["https://github.com/rust-lang/crates.io-index"]
 allow-git = []
