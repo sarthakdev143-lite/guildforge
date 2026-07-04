@@ -1,0 +1,667 @@
+_schema_version: 1
+
+server:
+  name: Augment Infotech
+  description: "Internal communication hub for Augment Infotech."
+  verification_level: very_high
+  explicit_content_filter: all
+  default_notifications: only_mentions
+  afk_timeout: 1800
+
+roles:
+  - name: Admin
+    color: red
+    hoist: true
+    mentionable: true
+    permissions: [administrator]
+  - name: Moderator
+    color: orange
+    hoist: true
+    mentionable: true
+    permissions:
+      - manage_messages
+      - kick_members
+      - ban_members
+      - manage_nicknames
+      - view_audit_log
+      - manage_roles
+      - manage_channels
+      - manage_webhooks
+  - name: Leadership
+    color: purple
+    hoist: true
+    mentionable: true
+    permissions:
+      - view_audit_log
+      - manage_nicknames
+      - priority_speaker
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - use_external_emojis
+      - connect
+      - speak
+      - stream
+  - name: Manager
+    color: blue
+    hoist: true
+    mentionable: true
+    permissions:
+      - manage_nicknames
+      - view_audit_log
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - connect
+      - speak
+      - stream
+      - move_members
+  - name: HR
+    color: magenta
+    hoist: true
+    mentionable: true
+    permissions:
+      - view_audit_log
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - connect
+      - speak
+  - name: Engineering
+    color: gold
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - create_public_threads
+      - create_private_threads
+      - send_messages_in_threads
+      - use_external_emojis
+      - connect
+      - speak
+      - stream
+      - use_application_commands
+  - name: AI Data
+    color: teal
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - create_public_threads
+      - send_messages_in_threads
+      - connect
+      - speak
+      - stream
+  - name: DevOps
+    color: dark_teal
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - create_public_threads
+      - send_messages_in_threads
+      - connect
+      - speak
+      - stream
+  - name: Sales
+    color: green
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - connect
+      - speak
+  - name: Marketing
+    color: dark_green
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - connect
+      - speak
+  - name: Employee
+    color: lighter_gray
+    hoist: false
+    mentionable: false
+    permissions:
+      - view_channel
+      - send_messages
+      - send_messages_in_threads
+      - create_public_threads
+      - embed_links
+      - attach_files
+      - add_reactions
+      - use_external_emojis
+      - read_message_history
+      - use_application_commands
+      - change_nickname
+      - connect
+      - speak
+      - stream
+      - use_vad
+  - name: Contractor
+    color: darker_gray
+    hoist: false
+    mentionable: false
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - connect
+      - speak
+  - name: Intern
+    color: light_gray
+    hoist: false
+    mentionable: false
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - connect
+      - speak
+
+categories:
+  # 1. INFORMATION — read-only announcements, rules, onboarding
+  - name: INFORMATION
+    description: "Company-wide announcements, rules, and policies."
+    channels:
+      - name: rules
+        type: text
+        topic: "Server rules and code of conduct. Read and acknowledge."
+        slowmode: 60
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Admin, Leadership]
+      - name: announcements
+        type: announcement
+        topic: "Official company-wide announcements."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Admin, Leadership]
+      - name: onboarding
+        type: text
+        topic: "New hire onboarding guide and resources."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Admin, HR]
+      - name: company-policies
+        type: text
+        topic: "HR policies, code of conduct, and procedures."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Admin, HR]
+
+  # 2. GENERAL — company-wide chat
+  - name: GENERAL
+    description: "Company-wide general conversations."
+    channels:
+      - name: general
+        type: text
+        topic: "Company-wide conversations. Keep it professional and inclusive."
+        slowmode: 5
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Contractor, Intern]
+      - name: random
+        type: text
+        topic: "Memes, fun, off-topic. Keep it SFW."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Contractor, Intern]
+      - name: introductions
+        type: text
+        topic: "New hires introduce themselves here."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Contractor, Intern]
+      - name: kudos
+        type: text
+        topic: "Peer recognition. Tag someone and say why they deserve kudos."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Contractor, Intern]
+      - name: social-events
+        type: text
+        topic: "Company events, outings, and social activities."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Contractor, Intern]
+
+  # 3. ENGINEERING
+  - name: ENGINEERING
+    description: "Engineering team channels."
+    channels:
+      - name: eng-general
+        type: text
+        topic: "Engineering general chat."
+        permissions:
+          read: [Engineering, Admin, Leadership]
+          write: [Engineering, Admin]
+      - name: eng-standup
+        type: text
+        topic: "Daily async standup. Post your update."
+        permissions:
+          read: [Engineering, Admin, Leadership]
+          write: [Engineering, Admin]
+      - name: eng-code-reviews
+        type: text
+        topic: "Request code reviews, share PRs."
+        permissions:
+          read: [Engineering, Admin, Leadership]
+          write: [Engineering, Admin]
+      - name: eng-architecture
+        type: text
+        topic: "Architecture discussions and design docs."
+        permissions:
+          read: [Engineering, Admin, Leadership]
+          write: [Engineering, Admin]
+      - name: eng-releases
+        type: announcement
+        topic: "Release notes and deployment notifications."
+        permissions:
+          read: [Engineering, Admin, Leadership]
+          write: [Admin, Leadership, Manager]
+      - name: eng-incidents
+        type: text
+        topic: "Incident response and post-mortems."
+        permissions:
+          read: [Engineering, Admin, Leadership]
+          write: [Engineering, Admin]
+
+  # 4. AI & DATA
+  - name: AI-DATA
+    description: "AI and Data team channels."
+    channels:
+      - name: ai-general
+        type: text
+        topic: "AI and Data team general chat."
+        permissions:
+          read: [AI Data, Admin, Leadership]
+          write: [AI Data, Admin]
+      - name: ai-research
+        type: text
+        topic: "Research papers, experiments, and models."
+        permissions:
+          read: [AI Data, Admin, Leadership]
+          write: [AI Data, Admin]
+      - name: ai-deployments
+        type: text
+        topic: "Model deployment notifications."
+        permissions:
+          read: [AI Data, Admin, Leadership]
+          write: [Admin, Leadership]
+
+  # 5. DEVOPS & INFRA
+  - name: DEVOPS-INFRA
+    description: "DevOps and infrastructure channels."
+    channels:
+      - name: devops-general
+        type: text
+        topic: "DevOps general chat."
+        permissions:
+          read: [DevOps, Admin, Leadership]
+          write: [DevOps, Admin]
+      - name: devops-alerts
+        type: text
+        topic: "Infrastructure alerts and monitoring."
+        permissions:
+          read: [DevOps, Admin, Leadership]
+          write: [DevOps, Admin]
+      - name: devops-deploys
+        type: text
+        topic: "Deployment logs and CI/CD notifications."
+        permissions:
+          read: [DevOps, Engineering, Admin, Leadership]
+          write: [DevOps, Admin]
+
+  # 6. PRODUCT & PROJECT MANAGEMENT
+  - name: PRODUCT
+    description: "Cross-team product and project management."
+    channels:
+      - name: product-general
+        type: text
+        topic: "Product discussions across teams."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Manager]
+      - name: project-updates
+        type: text
+        topic: "Weekly project status updates."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Manager, Leadership]
+
+  # 7. SALES
+  - name: SALES
+    description: "Sales team channels."
+    channels:
+      - name: sales-general
+        type: text
+        topic: "Sales team general chat."
+        permissions:
+          read: [Sales, Admin, Leadership]
+          write: [Sales, Admin]
+      - name: sales-leads
+        type: text
+        topic: "Lead tracking and pipeline updates."
+        permissions:
+          read: [Sales, Admin, Leadership, Manager]
+          write: [Sales, Admin]
+
+  # 8. MARKETING
+  - name: MARKETING
+    description: "Marketing team channels."
+    channels:
+      - name: marketing-general
+        type: text
+        topic: "Marketing team general chat."
+        permissions:
+          read: [Marketing, Admin, Leadership]
+          write: [Marketing, Admin]
+      - name: marketing-campaigns
+        type: text
+        topic: "Campaign planning and content calendar."
+        permissions:
+          read: [Marketing, Admin, Leadership]
+          write: [Marketing, Admin]
+
+  # 9. HR (Private)
+  - name: HR
+    description: "Private HR channels. Access restricted."
+    channels:
+      - name: hr-announcements
+        type: text
+        topic: "HR announcements for the HR team."
+        permissions:
+          read: [HR, Admin]
+          write: [HR, Admin]
+      - name: hr-recruitment
+        type: text
+        topic: "Recruitment pipeline and candidate discussions."
+        permissions:
+          read: [HR, Admin, Leadership]
+          write: [HR, Admin]
+      - name: hr-onboarding
+        type: text
+        topic: "Onboarding tracking and checklists."
+        permissions:
+          read: [HR, Admin]
+          write: [HR, Admin]
+      - name: hr-confidential
+        type: text
+        topic: "Confidential HR matters. Leadership access restricted."
+        permissions:
+          read: [HR, Admin]
+          write: [HR, Admin]
+
+  # 10. MANAGEMENT (Private)
+  - name: MANAGEMENT
+    description: "Leadership strategy and management channels."
+    channels:
+      - name: management-strategy
+        type: text
+        topic: "Strategic discussions and planning."
+        permissions:
+          read: [Leadership, Manager, Admin]
+          write: [Leadership, Admin]
+      - name: management-budget
+        type: text
+        topic: "Budget discussions and financial planning."
+        permissions:
+          read: [Leadership, Admin]
+          write: [Leadership, Admin]
+      - name: management-hiring
+        type: text
+        topic: "Hiring decisions and headcount planning."
+        permissions:
+          read: [Leadership, Manager, Admin]
+          write: [Leadership, Admin]
+
+  # 11. OPERATIONS
+  - name: OPERATIONS
+    description: "Office operations, WFH, leaves, IT support."
+    channels:
+      - name: ops-office
+        type: text
+        topic: "Office updates and hybrid schedule."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Manager, Admin]
+      - name: ops-wfh
+        type: text
+        topic: "Work-from-home requests and coordination."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Admin]
+      - name: ops-leaves
+        type: text
+        topic: "Leave announcements and tracking."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [HR, Admin, Manager]
+      - name: ops-it-tickets
+        type: text
+        topic: "IT support tickets. Describe your issue."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Contractor, Intern]
+
+  # 12. VOICE LOUNGES
+  - name: VOICE LOUNGES
+    description: "Voice channels for meetings and hangouts."
+    channels:
+      - name: General Voice
+        type: voice
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Contractor, Intern]
+          connect: [Employee, Contractor, Intern]
+          speak: [Employee, Contractor, Intern]
+      - name: Meeting Room 1
+        type: voice
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Contractor, Intern]
+          connect: [Employee, Contractor, Intern]
+          speak: [Employee, Contractor, Intern]
+      - name: Meeting Room 2
+        type: voice
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Contractor, Intern]
+          connect: [Employee, Contractor, Intern]
+          speak: [Employee, Contractor, Intern]
+      - name: Meeting Room 3
+        type: voice
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Contractor, Intern]
+          connect: [Employee, Contractor, Intern]
+          speak: [Employee, Contractor, Intern]
+      - name: Focus Room
+        type: voice
+        topic: "Quiet coworking space. Mute recommended."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Contractor, Intern]
+          connect: [Employee, Contractor, Intern]
+          speak: [Employee, Contractor, Intern]
+      - name: Break Room
+        type: voice
+        topic: "AFK channel. Take a break!"
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Contractor, Intern]
+          connect: [Employee, Contractor, Intern]
+          speak: [Employee, Contractor, Intern]
+      - name: Town Hall
+        type: stage_voice
+        topic: "Monthly all-hands meetings."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Leadership, Admin, Moderator]
+          connect: [Employee, Contractor, Intern]
+          speak: [Leadership, Admin, Moderator]
+
+  # 13. FORUMS
+  - name: FORUMS
+    description: "Forum channels for persistent discussions."
+    channels:
+      - name: Project Discussions
+        type: forum
+        topic: "Start a post for each project to discuss updates, blockers, decisions."
+        available_tags: [Active, Completed, On-Hold, Technical, Business]
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Manager]
+      - name: Bug Tracker
+        type: forum
+        topic: "Report bugs and track issues."
+        available_tags: [Bug, Feature-Request, Security, UI, Backend, AI, DevOps, Critical]
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Contractor, Intern]
+      - name: Ideas
+        type: forum
+        topic: "Share ideas for process, product, culture, and tech improvements."
+        available_tags: [Process, Product, Culture, Tech]
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Contractor, Intern]
+      - name: Knowledge Base
+        type: forum
+        topic: "Written guides, how-tos, and documentation."
+        available_tags: [Guide, How-To, Reference, FAQ]
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Manager, Leadership, Admin]
+
+  # 14. BOTS & LOGS (Private to admin/mod)
+  - name: BOTS-LOGS
+    description: "Bot commands and system logs. Admin/Moderator only."
+    channels:
+      - name: bot-commands
+        type: text
+        topic: "Interact with bots using slash commands."
+        permissions:
+          read: [Employee, Contractor, Intern]
+          write: [Employee, Contractor, Intern]
+      - name: admin-logs
+        type: text
+        topic: "Audit log bot output. Read-only for Leadership."
+        permissions:
+          read: [Admin, Moderator, Leadership]
+          write: [Admin]
+      - name: mod-logs
+        type: text
+        topic: "Moderation action logs."
+        permissions:
+          read: [Admin, Moderator]
+          write: [Admin]
+      - name: join-leave-log
+        type: text
+        topic: "Member join/leave notifications."
+        permissions:
+          read: [Admin, Moderator, Leadership, HR]
+          write: [Admin]
+
+  # 15. ARCHIVE
+  - name: ARCHIVE
+    description: "Old inactive channels. Read-only."
+    channels:
+      - name: archive-general
+        type: text
+        topic: "Archived channels storage. Read-only."
+        permissions:
+          read: [Employee, Admin]
+          write: [Admin]
+
+# Webhooks for CI/CD integrations
+webhooks:
+  - name: CI Deploy Notifier
+    channel: eng-releases
+  - name: Incident Notifier
+    channel: eng-incidents
+
+# Forum tags configuration
+forum_tags:
+  Project Discussions:
+    - name: Active
+      emoji: "🟢"
+    - name: Completed
+      emoji: "✅"
+    - name: On-Hold
+      emoji: "⏸️"
+    - name: Technical
+      emoji: "⚙️"
+    - name: Business
+      emoji: "📊"
+  Bug Tracker:
+    - name: Bug
+      emoji: "🐛"
+    - name: Feature-Request
+      emoji: "💡"
+    - name: Security
+      emoji: "🔒"
+    - name: Critical
+      emoji: "🚨"
+
+# Welcome screen
+welcome_screen:
+  enabled: true
+  description: |
+    Welcome to Augment Infotech!
+    Your company hub for communication, code, and collaboration.
+    Let's get you set up.
+  channels:
+    - channel: rules
+      description: Read the server rules first
+    - channel: announcements
+      description: Company-wide announcements
+    - channel: onboarding
+      description: New hire onboarding guide
+
+# Role ordering (top to bottom = highest to lowest)
+ordering:
+  roles: [Admin, Moderator, Leadership, Manager, HR, Engineering, AI Data, DevOps, Sales, Marketing, Employee, Contractor, Intern, everyone]
+  categories: [INFORMATION, GENERAL, ENGINEERING, AI-DATA, DEVOPS-INFRA, PRODUCT, SALES, MARKETING, HR, MANAGEMENT, OPERATIONS, VOICE LOUNGES, FORUMS, BOTS-LOGS, ARCHIVE]
