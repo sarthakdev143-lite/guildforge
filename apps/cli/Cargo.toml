@@ -1,0 +1,42 @@
+[package]
+name = "guildforge"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Infrastructure as Code for Discord Workspaces."
+
+[[bin]]
+name = "guildforge"
+path = "src/main.rs"
+
+[dependencies]
+guildforge-engine = { workspace = true }
+guildforge-executor = { workspace = true }
+guildforge-provider = { workspace = true }
+guildforge-provider-discord = { workspace = true }
+guildforge-logging = { workspace = true }
+guildforge-shared = { workspace = true }
+guildforge-config = { workspace = true }
+guildforge-parser = { workspace = true }
+guildforge-validation = { workspace = true }
+guildforge-planner = { workspace = true }
+guildforge-state = { workspace = true }
+tokio = { workspace = true }
+clap = { workspace = true }
+clap_complete = { workspace = true }
+anyhow = { workspace = true }
+miette = { workspace = true }
+tracing = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_yaml = { workspace = true }
+rpassword = "7"
+atty = "0.2"
+
+[dev-dependencies]
+assert_cmd = { workspace = true }
+predicates = { workspace = true }
+tempfile = { workspace = true }

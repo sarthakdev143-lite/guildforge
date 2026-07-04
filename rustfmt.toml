@@ -1,0 +1,17 @@
+# rustfmt config for GuildForge.
+# Mirrors the Rust style guide with two exceptions: longer line width
+# (100) and import reordering enabled. See CONTRIBUTING.md.
+#
+# Note: unstable features (imports_granularity, group_imports,
+# wrap_comments, format_code_in_doc_comments) require nightly rustfmt
+# and are intentionally NOT used here so that stable CI works.
+
+edition = "2021"
+max_width = 100
+hard_tabs = false
+tab_spaces = 4
+newline_style = "Unix"
+use_field_init_shorthand = true
+use_try_shorthand = true
+reorder_imports = true
+reorder_modules = true

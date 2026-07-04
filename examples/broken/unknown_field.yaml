@@ -1,0 +1,7 @@
+# Broken example: unknown field at top level.
+# Should fail at parse time.
+
+server:
+  name: Test
+
+bogus_top_level_key: true

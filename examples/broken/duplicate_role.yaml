@@ -1,0 +1,11 @@
+# Broken example: duplicate role names (case-insensitive).
+# Should fail V001.
+
+server:
+  name: Test
+
+roles:
+  - name: Admin
+    color: red
+  - name: admin
+    color: blue

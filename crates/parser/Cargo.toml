@@ -1,0 +1,20 @@
+[package]
+name = "guildforge-parser"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "YAML parser for GuildForge config files."
+
+[dependencies]
+guildforge-config = { workspace = true }
+guildforge-shared = { workspace = true }
+serde_yaml = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }
+insta = { workspace = true }
+proptest = { workspace = true }

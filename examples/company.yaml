@@ -1,0 +1,170 @@
+# GuildForge example: company.yaml
+#
+# A medium-sized internal guild for a fictional company "Augment Infotech".
+# Demonstrates: roles, categories, mixed text/forum channels, permission
+# overwrites, webhooks, forum tags, welcome screen.
+#
+# Run: guildforge validate examples/company.yaml
+
+_schema_version: 1
+
+server:
+  name: Augment Infotech
+  description: Internal guild for Augment Infotech staff.
+  verification_level: medium
+  explicit_content_filter: all
+  default_notifications: only_mentions
+  system_channel: general
+  afk_channel: voice-afk
+  afk_timeout: 300
+  premium_progress_bar: true
+
+roles:
+  - name: Admin
+    color: red
+    hoist: true
+    mentionable: true
+    permissions: [administrator]
+
+  - name: Staff
+    color: blue
+    hoist: true
+    mentionable: true
+    permissions:
+      - send_messages
+      - read_message_history
+      - attach_files
+      - embed_links
+      - add_reactions
+      - use_external_emojis
+      - connect
+      - speak
+      - stream
+
+  - name: Contractor
+    color: green
+    hoist: false
+    mentionable: false
+    permissions:
+      - send_messages
+      - read_message_history
+
+  - name: Guest
+    color: default
+    hoist: false
+    mentionable: false
+    permissions:
+      - read_message_history
+
+categories:
+  - name: COMPANY
+    description: Company-wide channels.
+    channels:
+      - name: announcements
+        type: text
+        topic: Read-only announcements from leadership.
+        permissions:
+          read: [everyone]
+          write: [Admin]
+      - name: general
+        type: text
+        topic: General chat for all staff.
+        permissions:
+          read: [everyone]
+          write: [Staff, Contractor]
+
+  - name: ENGINEERING
+    description: Engineering team channels.
+    channels:
+      - name: eng-general
+        type: text
+        topic: Engineering-wide discussion.
+      - name: eng-releases
+        type: announcement
+        topic: Release announcements.
+        permissions:
+          read: [everyone]
+          write: [Admin]
+      - name: eng-incidents
+        type: text
+        topic: Incident response. @Admin for escalations.
+      - name: eng-help
+        type: forum
+        topic: Ask engineering questions. Search before posting.
+        available_tags: [question, answered, bug, design]
+
+  - name: SOCIAL
+    description: Non-work channels.
+    channels:
+      - name: random
+        type: text
+        topic: Off-topic. Keep it SFW.
+      - name: memes
+        type: text
+        topic: Memes. Lots of memes.
+      - name: voice-afk
+        type: voice
+
+channels:
+  - name: welcome
+    type: text
+    topic: Welcome channel. Read by new members on join.
+
+permissions:
+  eng-incidents:
+    read: [Staff, Contractor]
+    write: [Staff]
+    manage: [Admin]
+  eng-help:
+    read: [Staff, Contractor]
+    write: [Staff, Contractor]
+
+permission_overwrites:
+  - channel: welcome
+    type: role
+    target: Guest
+    allow: [read_message_history]
+    deny: [send_messages]
+
+webhooks:
+  - name: CI Notifier
+    channel: eng-releases
+  - name: Deploy Notifier
+    channel: eng-incidents
+
+forum_tags:
+  eng-help:
+    - name: Question
+      emoji: "?"
+      moderated: false
+    - name: Answered
+      emoji: "?"
+      moderated: true
+    - name: Bug
+      emoji: "?"
+      moderated: false
+    - name: Design
+      emoji: "?"
+      moderated: false
+
+welcome_screen:
+  enabled: true
+  description: |
+    Welcome to Augment Infotech. Start in #welcome, then introduce
+    yourself in #general.
+  channels:
+    - channel: welcome
+      description: Start here
+    - channel: general
+      description: Say hello
+    - channel: eng-general
+      description: Engineering chat
+
+ordering:
+  roles: [Admin, Staff, Contractor, Guest, everyone]
+  categories: [COMPANY, ENGINEERING, SOCIAL]
+  channels:
+    COMPANY: [announcements, general]
+    ENGINEERING: [eng-general, eng-releases, eng-incidents, eng-help]
+    SOCIAL: [random, memes, voice-afk]
+    _top_level: [welcome]
