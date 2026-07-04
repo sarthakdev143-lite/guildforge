@@ -1,0 +1,1168 @@
+_schema_version: 1
+
+server:
+  name: Augment Infotech
+  description: "Digital Workplace Operating System for Augment Infotech"
+  verification_level: high
+  explicit_content_filter: all
+  default_notifications: only_mentions
+  afk_timeout: 1800
+
+# ============================================================
+# ROLES — Highest to Lowest hierarchy
+# ============================================================
+roles:
+  # --- Top-Level Roles ---
+  - name: Owner
+    color: "#FFD700"
+    hoist: true
+    mentionable: true
+    permissions: [administrator]
+  - name: Admin
+    color: red
+    hoist: true
+    mentionable: true
+    permissions: [administrator]
+  - name: Management
+    color: purple
+    hoist: true
+    mentionable: true
+    permissions:
+      - view_audit_log
+      - manage_nicknames
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - manage_messages
+      - connect
+      - speak
+      - stream
+      - priority_speaker
+      - move_members
+      - mute_members
+      - deafen_members
+
+  # --- Department Roles ---
+  - name: Engineering
+    color: blue
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - create_public_threads
+      - send_messages_in_threads
+      - use_external_emojis
+      - connect
+      - speak
+      - stream
+      - use_application_commands
+  - name: AI
+    color: dark_blue
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - create_public_threads
+      - send_messages_in_threads
+      - connect
+      - speak
+      - stream
+  - name: DevOps
+    color: dark_teal
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - create_public_threads
+      - send_messages_in_threads
+      - connect
+      - speak
+      - stream
+  - name: QA
+    color: dark_green
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - create_public_threads
+      - send_messages_in_threads
+      - connect
+      - speak
+      - stream
+  - name: Product
+    color: gold
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - create_public_threads
+      - send_messages_in_threads
+      - connect
+      - speak
+      - stream
+  - name: UI/UX
+    color: dark_orange
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - create_public_threads
+      - send_messages_in_threads
+      - connect
+      - speak
+      - stream
+  - name: Sales
+    color: green
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - connect
+      - speak
+      - stream
+  - name: Marketing
+    color: magenta
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - connect
+      - speak
+      - stream
+  - name: Operations
+    color: teal
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - connect
+      - speak
+      - stream
+  - name: HR
+    color: dark_magenta
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_audit_log
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - manage_messages
+      - connect
+      - speak
+      - stream
+      - kick_members
+  - name: Finance
+    color: dark_gold
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - connect
+      - speak
+  - name: Legal
+    color: dark_red
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - connect
+      - speak
+
+  # --- Position Roles (combine with department) ---
+  - name: Department Head
+    color: orange
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - manage_messages
+      - manage_nicknames
+      - connect
+      - speak
+      - stream
+      - priority_speaker
+      - move_members
+  - name: Team Lead
+    color: lighter_gray
+    hoist: false
+    mentionable: true
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - manage_messages
+      - connect
+      - speak
+      - stream
+      - move_members
+  - name: Senior
+    color: light_gray
+    hoist: false
+    mentionable: false
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - create_public_threads
+      - send_messages_in_threads
+      - connect
+      - speak
+      - stream
+  - name: Mid-Level
+    color: darker_gray
+    hoist: false
+    mentionable: false
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - create_public_threads
+      - send_messages_in_threads
+      - connect
+      - speak
+  - name: Junior
+    color: dark_gray
+    hoist: false
+    mentionable: false
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - connect
+      - speak
+  - name: Intern
+    color: light_blue
+    hoist: false
+    mentionable: false
+    permissions:
+      - view_channel
+      - send_messages
+      - read_message_history
+      - embed_links
+      - attach_files
+      - add_reactions
+      - connect
+      - speak
+
+  # --- Employee base role ---
+  - name: Employee
+    color: default
+    hoist: false
+    mentionable: false
+    permissions:
+      - view_channel
+      - send_messages
+      - send_messages_in_threads
+      - create_public_threads
+      - embed_links
+      - attach_files
+      - add_reactions
+      - use_external_emojis
+      - read_message_history
+      - use_application_commands
+      - change_nickname
+      - connect
+      - speak
+      - stream
+      - use_vad
+
+# ============================================================
+# CATEGORIES & CHANNELS
+# ============================================================
+categories:
+  # --- 1. COMPANY (Visible to Everyone) ---
+  - name: COMPANY
+    description: "Company-wide communication."
+    channels:
+      - name: announcements
+        type: text
+        topic: "Official company announcements. Read-only."
+        permissions:
+          read: [Employee, Intern]
+          write: [Admin, Management]
+      - name: company-news
+        type: text
+        topic: "Company news and updates."
+        permissions:
+          read: [Employee, Intern]
+          write: [Admin, Management, HR]
+      - name: events
+        type: text
+        topic: "Company events and activities."
+        permissions:
+          read: [Employee, Intern]
+          write: [Admin, Management, HR]
+      - name: achievements
+        type: text
+        topic: "Company and individual achievements."
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Management]
+      - name: birthdays
+        type: text
+        topic: "Employee birthdays and celebrations."
+        permissions:
+          read: [Employee, Intern]
+          write: [HR, Admin]
+      - name: introductions
+        type: text
+        topic: "New employees introduce themselves here."
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+      - name: policies
+        type: text
+        topic: "Company policies. Read-only."
+        permissions:
+          read: [Employee, Intern]
+          write: [Admin, HR, Management]
+      - name: office-updates
+        type: text
+        topic: "Office-related updates and announcements."
+        permissions:
+          read: [Employee, Intern]
+          write: [Admin, Operations, Management]
+      - name: ask-management
+        type: text
+        topic: "Ask management questions directly."
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+      - name: polls
+        type: text
+        topic: "Company-wide polls and surveys."
+        permissions:
+          read: [Employee, Intern]
+          write: [Admin, Management, HR]
+
+  # --- 2. COMMUNITY (Visible to Everyone) ---
+  - name: COMMUNITY
+    description: "Company culture and social discussions."
+    channels:
+      - name: general
+        type: text
+        topic: "General company chat."
+        slowmode: 5
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+      - name: random
+        type: text
+        topic: "Off-topic, memes, fun. Keep it SFW."
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+      - name: lunch-plans
+        type: text
+        topic: "Lunch plans and food discussions."
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+      - name: celebrations
+        type: text
+        topic: "Celebrate wins, milestones, and festivals."
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+      - name: suggestions
+        type: text
+        topic: "Company improvement suggestions."
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+      - name: recognition
+        type: text
+        topic: "Peer recognition and kudos."
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+      - name: wellness
+        type: text
+        topic: "Mental and physical wellness discussions."
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+      - name: anonymous-feedback
+        type: text
+        topic: "Anonymous feedback for management."
+        permissions:
+          read: [Management, Admin]
+          write: [Employee, Intern]
+
+  # --- 3. KNOWLEDGE (Visible to Everyone) ---
+  - name: KNOWLEDGE
+    description: "Permanent company knowledge base."
+    channels:
+      - name: company-docs
+        type: text
+        topic: "Company documentation links."
+        permissions:
+          read: [Employee, Intern]
+          write: [Admin, Management]
+      - name: employee-handbook
+        type: text
+        topic: "Employee handbook and guides."
+        permissions:
+          read: [Employee, Intern]
+          write: [HR, Admin]
+      - name: coding-guidelines
+        type: text
+        topic: "Coding standards and best practices."
+        permissions:
+          read: [Employee, Intern]
+          write: [Engineering, Admin]
+      - name: architecture
+        type: text
+        topic: "System architecture and design docs."
+        permissions:
+          read: [Employee, Intern]
+          write: [Engineering, Admin]
+      - name: deployment-guide
+        type: text
+        topic: "Deployment procedures and guides."
+        permissions:
+          read: [Employee, Intern]
+          write: [DevOps, Engineering, Admin]
+      - name: templates
+        type: text
+        topic: "Document and code templates."
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee]
+      - name: training-recordings
+        type: text
+        topic: "Training session recordings and slides."
+        permissions:
+          read: [Employee, Intern]
+          write: [Admin, Management, HR]
+      - name: runbooks
+        type: text
+        topic: "Operational runbooks and playbooks."
+        permissions:
+          read: [Employee, Intern]
+          write: [DevOps, Admin]
+      - name: faq
+        type: text
+        topic: "Frequently asked questions."
+        permissions:
+          read: [Employee, Intern]
+          write: [Admin, HR]
+
+  # --- 4. OPERATIONS (Visible to Everyone) ---
+  - name: OPERATIONS
+    description: "Company operations and support."
+    channels:
+      - name: daily-standup
+        type: text
+        topic: "Daily async standup updates."
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+      - name: helpdesk
+        type: forum
+        topic: "IT support tickets. Post your issue here."
+        available_tags: [IT, Hardware, Software, Network, Account, Urgent]
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+      - name: office-ops
+        type: text
+        topic: "Office operations and facilities."
+        permissions:
+          read: [Employee, Intern]
+          write: [Operations, Admin]
+      - name: leave-requests
+        type: text
+        topic: "Leave requests and approvals."
+        permissions:
+          read: [Employee, HR, Management, Admin]
+          write: [Employee, Intern]
+
+  # --- 5. VOICE (Visible to Everyone) ---
+  - name: VOICE
+    description: "Voice channels for meetings and hangouts."
+    channels:
+      - name: All Hands
+        type: stage_voice
+        topic: "Company-wide all-hands meetings."
+        permissions:
+          read: [Employee, Intern]
+          write: [Management, Admin]
+          connect: [Employee, Intern]
+          speak: [Management, Admin]
+      - name: Daily Standup
+        type: voice
+        topic: "Daily standup voice room."
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+          connect: [Employee, Intern]
+          speak: [Employee, Intern]
+      - name: Interview Room
+        type: voice
+        topic: "Interview room."
+        permissions:
+          read: [HR, Management, Admin]
+          write: [HR, Management, Admin]
+          connect: [HR, Management, Admin]
+          speak: [HR, Management, Admin]
+      - name: Meeting Room 1
+        type: voice
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+          connect: [Employee, Intern]
+          speak: [Employee, Intern]
+      - name: Meeting Room 2
+        type: voice
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+          connect: [Employee, Intern]
+          speak: [Employee, Intern]
+      - name: Focus Room
+        type: voice
+        topic: "Quiet coworking. Mute recommended."
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+          connect: [Employee, Intern]
+          speak: [Employee, Intern]
+      - name: Hangout
+        type: voice
+        topic: "Casual hangout voice room."
+        permissions:
+          read: [Employee, Intern]
+          write: [Employee, Intern]
+          connect: [Employee, Intern]
+          speak: [Employee, Intern]
+
+  # --- 6. ENGINEERING (Private to Engineering) ---
+  - name: ENGINEERING
+    description: "Engineering department channels."
+    channels:
+      - name: eng-announcements
+        type: text
+        topic: "Engineering department announcements."
+        permissions:
+          read: [Engineering, Admin, Management]
+          write: [Department Head, Admin, Management]
+      - name: eng-general
+        type: text
+        topic: "Engineering general chat."
+        permissions:
+          read: [Engineering, Admin]
+          write: [Engineering, Admin]
+      - name: eng-help
+        type: text
+        topic: "Engineering help and questions."
+        permissions:
+          read: [Engineering, Admin]
+          write: [Engineering, Admin]
+      - name: eng-resources
+        type: text
+        topic: "Engineering resources and links."
+        permissions:
+          read: [Engineering, Admin]
+          write: [Engineering, Admin]
+      - name: eng-forum
+        type: forum
+        topic: "Engineering discussions."
+        available_tags: [Discussion, Architecture, Bug, Idea]
+        permissions:
+          read: [Engineering, Admin]
+          write: [Engineering, Admin]
+      - name: eng-voice
+        type: voice
+        topic: "Engineering voice room."
+        permissions:
+          read: [Engineering, Admin]
+          write: [Engineering, Admin]
+          connect: [Engineering, Admin]
+          speak: [Engineering, Admin]
+
+  # --- 7. AI (Private to AI) ---
+  - name: AI
+    description: "AI department channels."
+    channels:
+      - name: ai-announcements
+        type: text
+        permissions:
+          read: [AI, Admin, Management]
+          write: [Department Head, Admin, Management]
+      - name: ai-general
+        type: text
+        permissions:
+          read: [AI, Admin]
+          write: [AI, Admin]
+      - name: ai-help
+        type: text
+        permissions:
+          read: [AI, Admin]
+          write: [AI, Admin]
+      - name: ai-resources
+        type: text
+        permissions:
+          read: [AI, Admin]
+          write: [AI, Admin]
+      - name: ai-forum
+        type: forum
+        available_tags: [Discussion, Model, Dataset, Bug, Idea]
+        permissions:
+          read: [AI, Admin]
+          write: [AI, Admin]
+      - name: ai-voice
+        type: voice
+        permissions:
+          read: [AI, Admin]
+          write: [AI, Admin]
+          connect: [AI, Admin]
+          speak: [AI, Admin]
+
+  # --- 8. DEVOPS (Private to DevOps) ---
+  - name: DEVOPS
+    description: "DevOps department channels."
+    channels:
+      - name: devops-announcements
+        type: text
+        permissions:
+          read: [DevOps, Admin, Management]
+          write: [Department Head, Admin, Management]
+      - name: devops-general
+        type: text
+        permissions:
+          read: [DevOps, Admin]
+          write: [DevOps, Admin]
+      - name: devops-help
+        type: text
+        permissions:
+          read: [DevOps, Admin]
+          write: [DevOps, Admin]
+      - name: devops-resources
+        type: text
+        permissions:
+          read: [DevOps, Admin]
+          write: [DevOps, Admin]
+      - name: devops-forum
+        type: forum
+        available_tags: [Discussion, Infra, Deploy, Bug, Idea]
+        permissions:
+          read: [DevOps, Admin]
+          write: [DevOps, Admin]
+      - name: devops-voice
+        type: voice
+        permissions:
+          read: [DevOps, Admin]
+          write: [DevOps, Admin]
+          connect: [DevOps, Admin]
+          speak: [DevOps, Admin]
+
+  # --- 9. QA (Private to QA) ---
+  - name: QA
+    description: "QA department channels."
+    channels:
+      - name: qa-announcements
+        type: text
+        permissions:
+          read: [QA, Admin, Management]
+          write: [Department Head, Admin, Management]
+      - name: qa-general
+        type: text
+        permissions:
+          read: [QA, Admin]
+          write: [QA, Admin]
+      - name: qa-help
+        type: text
+        permissions:
+          read: [QA, Admin]
+          write: [QA, Admin]
+      - name: qa-resources
+        type: text
+        permissions:
+          read: [QA, Admin]
+          write: [QA, Admin]
+      - name: qa-forum
+        type: forum
+        available_tags: [Discussion, Test-Plan, Bug, Automation]
+        permissions:
+          read: [QA, Admin]
+          write: [QA, Admin]
+      - name: qa-voice
+        type: voice
+        permissions:
+          read: [QA, Admin]
+          write: [QA, Admin]
+          connect: [QA, Admin]
+          speak: [QA, Admin]
+
+  # --- 10. PRODUCT (Private to Product) ---
+  - name: PRODUCT
+    description: "Product department channels."
+    channels:
+      - name: product-announcements
+        type: text
+        permissions:
+          read: [Product, Admin, Management]
+          write: [Department Head, Admin, Management]
+      - name: product-general
+        type: text
+        permissions:
+          read: [Product, Admin]
+          write: [Product, Admin]
+      - name: product-help
+        type: text
+        permissions:
+          read: [Product, Admin]
+          write: [Product, Admin]
+      - name: product-resources
+        type: text
+        permissions:
+          read: [Product, Admin]
+          write: [Product, Admin]
+      - name: product-forum
+        type: forum
+        available_tags: [Discussion, PRD, Roadmap, Idea]
+        permissions:
+          read: [Product, Admin]
+          write: [Product, Admin]
+      - name: product-voice
+        type: voice
+        permissions:
+          read: [Product, Admin]
+          write: [Product, Admin]
+          connect: [Product, Admin]
+          speak: [Product, Admin]
+
+  # --- 11. UI/UX (Private to UI/UX) ---
+  - name: UI-UX
+    description: "UI/UX department channels."
+    channels:
+      - name: design-announcements
+        type: text
+        permissions:
+          read: [UI/UX, Admin, Management]
+          write: [Department Head, Admin, Management]
+      - name: design-general
+        type: text
+        permissions:
+          read: [UI/UX, Admin]
+          write: [UI/UX, Admin]
+      - name: design-help
+        type: text
+        permissions:
+          read: [UI/UX, Admin]
+          write: [UI/UX, Admin]
+      - name: design-resources
+        type: text
+        permissions:
+          read: [UI/UX, Admin]
+          write: [UI/UX, Admin]
+      - name: design-forum
+        type: forum
+        available_tags: [Discussion, Wireframe, Mockup, Feedback]
+        permissions:
+          read: [UI/UX, Admin]
+          write: [UI/UX, Admin]
+      - name: design-voice
+        type: voice
+        permissions:
+          read: [UI/UX, Admin]
+          write: [UI/UX, Admin]
+          connect: [UI/UX, Admin]
+          speak: [UI/UX, Admin]
+
+  # --- 12. SALES (Private to Sales) ---
+  - name: SALES
+    description: "Sales department channels."
+    channels:
+      - name: sales-announcements
+        type: text
+        permissions:
+          read: [Sales, Admin, Management]
+          write: [Department Head, Admin, Management]
+      - name: sales-general
+        type: text
+        permissions:
+          read: [Sales, Admin]
+          write: [Sales, Admin]
+      - name: sales-help
+        type: text
+        permissions:
+          read: [Sales, Admin]
+          write: [Sales, Admin]
+      - name: sales-resources
+        type: text
+        permissions:
+          read: [Sales, Admin]
+          write: [Sales, Admin]
+      - name: sales-forum
+        type: forum
+        available_tags: [Discussion, Lead, Pitch, Client]
+        permissions:
+          read: [Sales, Admin]
+          write: [Sales, Admin]
+      - name: sales-voice
+        type: voice
+        permissions:
+          read: [Sales, Admin]
+          write: [Sales, Admin]
+          connect: [Sales, Admin]
+          speak: [Sales, Admin]
+
+  # --- 13. MARKETING (Private to Marketing) ---
+  - name: MARKETING
+    description: "Marketing department channels."
+    channels:
+      - name: marketing-announcements
+        type: text
+        permissions:
+          read: [Marketing, Admin, Management]
+          write: [Department Head, Admin, Management]
+      - name: marketing-general
+        type: text
+        permissions:
+          read: [Marketing, Admin]
+          write: [Marketing, Admin]
+      - name: marketing-help
+        type: text
+        permissions:
+          read: [Marketing, Admin]
+          write: [Marketing, Admin]
+      - name: marketing-resources
+        type: text
+        permissions:
+          read: [Marketing, Admin]
+          write: [Marketing, Admin]
+      - name: marketing-forum
+        type: forum
+        available_tags: [Discussion, Campaign, Content, Social]
+        permissions:
+          read: [Marketing, Admin]
+          write: [Marketing, Admin]
+      - name: marketing-voice
+        type: voice
+        permissions:
+          read: [Marketing, Admin]
+          write: [Marketing, Admin]
+          connect: [Marketing, Admin]
+          speak: [Marketing, Admin]
+
+  # --- 14. OPERATIONS DEPT (Private to Operations) ---
+  - name: OPERATIONS-DEPT
+    description: "Operations department channels."
+    channels:
+      - name: ops-announcements
+        type: text
+        permissions:
+          read: [Operations, Admin, Management]
+          write: [Department Head, Admin, Management]
+      - name: ops-general
+        type: text
+        permissions:
+          read: [Operations, Admin]
+          write: [Operations, Admin]
+      - name: ops-help
+        type: text
+        permissions:
+          read: [Operations, Admin]
+          write: [Operations, Admin]
+      - name: ops-resources
+        type: text
+        permissions:
+          read: [Operations, Admin]
+          write: [Operations, Admin]
+      - name: ops-forum
+        type: forum
+        available_tags: [Discussion, Facility, Equipment, Issue]
+        permissions:
+          read: [Operations, Admin]
+          write: [Operations, Admin]
+      - name: ops-voice
+        type: voice
+        permissions:
+          read: [Operations, Admin]
+          write: [Operations, Admin]
+          connect: [Operations, Admin]
+          speak: [Operations, Admin]
+
+  # --- 15. MANAGEMENT (Private) ---
+  - name: MANAGEMENT
+    description: "Leadership and management channels."
+    channels:
+      - name: strategy
+        type: text
+        topic: "Strategic discussions and planning."
+        permissions:
+          read: [Management, Admin, Owner]
+          write: [Management, Admin, Owner]
+      - name: growth
+        type: text
+        topic: "Company growth and scaling discussions."
+        permissions:
+          read: [Management, Admin, Owner]
+          write: [Management, Admin, Owner]
+      - name: hiring
+        type: text
+        topic: "Hiring decisions and headcount planning."
+        permissions:
+          read: [Management, Admin, Owner, HR]
+          write: [Management, Admin, Owner]
+      - name: budgets
+        type: text
+        topic: "Budget discussions."
+        permissions:
+          read: [Management, Admin, Owner, Finance]
+          write: [Management, Admin, Owner]
+      - name: planning
+        type: text
+        topic: "Quarterly and annual planning."
+        permissions:
+          read: [Management, Admin, Owner]
+          write: [Management, Admin, Owner]
+      - name: client-pipeline
+        type: text
+        topic: "Client pipeline and business development."
+        permissions:
+          read: [Management, Admin, Owner, Sales]
+          write: [Management, Admin, Owner]
+      - name: decision-log
+        type: text
+        topic: "Important company decisions log."
+        permissions:
+          read: [Management, Admin, Owner]
+          write: [Management, Admin, Owner]
+      - name: mgmt-forum
+        type: forum
+        topic: "Management discussions."
+        available_tags: [Strategy, Operations, Finance, HR]
+        permissions:
+          read: [Management, Admin, Owner]
+          write: [Management, Admin, Owner]
+
+  # --- 16. HR (Private) ---
+  - name: HR
+    description: "HR department private channels."
+    channels:
+      - name: recruitment
+        type: text
+        topic: "Recruitment pipeline and candidates."
+        permissions:
+          read: [HR, Admin, Management]
+          write: [HR, Admin]
+      - name: interviews
+        type: text
+        topic: "Interview scheduling and feedback."
+        permissions:
+          read: [HR, Admin, Management]
+          write: [HR, Admin]
+      - name: onboarding
+        type: text
+        topic: "New employee onboarding tracking."
+        permissions:
+          read: [HR, Admin, Management]
+          write: [HR, Admin]
+      - name: exit-process
+        type: text
+        topic: "Exit processes and offboarding."
+        permissions:
+          read: [HR, Admin, Management]
+          write: [HR, Admin]
+      - name: payroll
+        type: text
+        topic: "Payroll and compensation."
+        permissions:
+          read: [HR, Admin, Management, Finance]
+          write: [HR, Admin]
+      - name: hr-policies
+        type: text
+        topic: "HR policies and procedures."
+        permissions:
+          read: [HR, Admin, Management]
+          write: [HR, Admin]
+      - name: hr-forum
+        type: forum
+        available_tags: [Recruitment, Policy, Onboarding, Grievance]
+        permissions:
+          read: [HR, Admin, Management]
+          write: [HR, Admin]
+
+  # --- 17. FINANCE (Private) ---
+  - name: FINANCE
+    description: "Finance department private channels."
+    channels:
+      - name: invoices
+        type: text
+        topic: "Invoice tracking and management."
+        permissions:
+          read: [Finance, Admin, Management]
+          write: [Finance, Admin]
+      - name: vendor-payments
+        type: text
+        topic: "Vendor payment tracking."
+        permissions:
+          read: [Finance, Admin, Management]
+          write: [Finance, Admin]
+      - name: finance-budgets
+        type: text
+        topic: "Budget tracking and forecasts."
+        permissions:
+          read: [Finance, Admin, Management]
+          write: [Finance, Admin]
+      - name: financial-reports
+        type: text
+        topic: "Financial reports and analysis."
+        permissions:
+          read: [Finance, Admin, Management]
+          write: [Finance, Admin]
+
+  # --- 18. LEGAL (Private) ---
+  - name: LEGAL
+    description: "Legal department private channels."
+    channels:
+      - name: contracts
+        type: text
+        topic: "Contract review and management."
+        permissions:
+          read: [Legal, Admin, Management]
+          write: [Legal, Admin]
+      - name: compliance
+        type: text
+        topic: "Compliance and regulatory matters."
+        permissions:
+          read: [Legal, Admin, Management]
+          write: [Legal, Admin]
+      - name: legal-notices
+        type: text
+        topic: "Legal notices and correspondence."
+        permissions:
+          read: [Legal, Admin, Management]
+          write: [Legal, Admin]
+
+  # --- 19. SYSTEM (Hidden, Admin only) ---
+  - name: SYSTEM
+    description: "System logs and bot configuration. Admin only."
+    channels:
+      - name: logs
+        type: text
+        topic: "System and audit logs."
+        permissions:
+          read: [Admin, Owner]
+          write: [Admin]
+      - name: audit
+        type: text
+        topic: "Audit trail."
+        permissions:
+          read: [Admin, Owner]
+          write: [Admin]
+      - name: webhooks
+        type: text
+        topic: "Webhook configuration."
+        permissions:
+          read: [Admin, Owner]
+          write: [Admin]
+      - name: bot-config
+        type: text
+        topic: "Bot configuration."
+        permissions:
+          read: [Admin, Owner]
+          write: [Admin]
+      - name: automation
+        type: text
+        topic: "Automation scripts and configs."
+        permissions:
+          read: [Admin, Owner]
+          write: [Admin]
+      - name: backups
+        type: text
+        topic: "Backup logs and status."
+        permissions:
+          read: [Admin, Owner]
+          write: [Admin]
+
+# ============================================================
+# ORDERING
+# ============================================================
+ordering:
+  roles:
+    [Owner, Admin, Management, Department Head, Team Lead, Senior, Mid-Level, Junior, Intern, Engineering, AI, DevOps, QA, Product, UI/UX, Sales, Marketing, Operations, HR, Finance, Legal, Employee, everyone]
+  categories:
+    [COMPANY, COMMUNITY, KNOWLEDGE, OPERATIONS, VOICE, ENGINEERING, AI, DEVOPS, QA, PRODUCT, UI-UX, SALES, MARKETING, OPERATIONS-DEPT, MANAGEMENT, HR, FINANCE, LEGAL, SYSTEM]
