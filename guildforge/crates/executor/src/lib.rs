@@ -278,6 +278,11 @@ impl Executor {
         let mut report = ExecutionReport::default();
         let mut failed_addrs: Vec<ResourceId> = Vec::new();
 
+        // Map category names to their Discord IDs (populated as
+        // categories are created, used to set parent_id on channels).
+        let category_ids: std::sync::Arc<tokio::sync::Mutex<std::collections::HashMap<String, String>>> =
+            std::sync::Arc::new(tokio::sync::Mutex::new(std::collections::HashMap::new()));
+
         for op in &plan.operations {
             // Check for cancellation between ops.
             if cancel.is_cancelled() {
@@ -300,7 +305,25 @@ impl Executor {
                 continue;
             }
 
-            let result = self.execute_op(op, &mut report, tx).await;
+            // For Create operations on channels, inject the parent_id
+            // from our category ID map.
+            let op = self.inject_parent_id(op, &category_ids).await;
+
+            let result = self.execute_op(&op, &mut report, tx).await;
+
+            // After a successful Create, record the resource ID for
+            // categories so channels can reference them.
+            if result.is_ok() {
+                if let guildforge_planner::Operation::Create { desired } = &op {
+                    if let guildforge_provider::Resource::Category(cat) = desired {
+                        if let Some(id) = cat.id {
+                            let mut ids = category_ids.lock().await;
+                            ids.insert(cat.name.clone(), id.to_string());
+                        }
+                    }
+                }
+            }
+
             match result {
                 Ok(()) => {}
                 Err(ExecutorError::Permanent {
@@ -473,6 +496,42 @@ impl Executor {
             .checked_mul(multiplier)
             .unwrap_or(self.config.max_backoff);
         std::cmp::min(base, self.config.max_backoff)
+    }
+
+    /// If this is a Create operation for a Channel, and the channel's
+    /// address contains a category prefix (e.g. `channel/ENGINEERING/eng-general`),
+    /// look up the category's Discord ID and inject it as `parent_id`.
+    async fn inject_parent_id(
+        &self,
+        op: &guildforge_planner::Operation,
+        category_ids: &std::sync::Arc<tokio::sync::Mutex<std::collections::HashMap<String, String>>>,
+    ) -> guildforge_planner::Operation {
+        use guildforge_planner::Operation;
+
+        let Operation::Create { desired } = op else {
+            return op.clone();
+        };
+        let guildforge_provider::Resource::Channel(mut ch) = desired.clone() else {
+            return op.clone();
+        };
+
+        // Parse the address: channel/<category>/<name> or channel/_top/<name>
+        let addr_parts: Vec<&str> = ch.addr.as_str().splitn(3, '/').collect();
+        if addr_parts.len() != 3 || addr_parts[1] == "_top" {
+            return op.clone();
+        }
+
+        let category_name = addr_parts[1];
+        let ids = category_ids.lock().await;
+        if let Some(parent_id_str) = ids.get(category_name) {
+            if let Ok(id) = parent_id_str.parse::<u64>() {
+                ch.parent_id = Some(guildforge_shared::Snowflake::new(id));
+            }
+        }
+
+        Operation::Create {
+            desired: guildforge_provider::Resource::Channel(ch),
+        }
     }
 }
 
