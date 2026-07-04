@@ -1,0 +1,1664 @@
+     1→# The Complete Discord Workspace Implementation Guide  
+     2→**For Augment Infotech**  
+     3→*Production-Ready Handbook – Version 1.0*
+     4→
+     5→---
+     6→
+     7→> **Note to Reader:**  
+     8→> This handbook assumes **zero prior Discord knowledge**. Every button, path, and toggle is spelled out precisely.  
+     9→> If you follow every step, you will have a fully operational company Discord server that replaces WhatsApp and becomes your internal company operating system.  
+    10→> **Do not skip sections.** The order matters.
+    11→
+    12→---
+    13→
+    14→# TABLE OF CONTENTS
+    15→
+    16→*Generated via headings, use Ctrl+F to navigate. For brevity here, structure as outlined in the prompt.*
+    17→
+    18→---
+    19→
+    20→# PART 1 – INTRODUCTION, PHILOSOPHY & ARCHITECTURE
+    21→
+    22→## 1.1 Why Discord Over WhatsApp for a Software Company
+    23→
+    24→| Capability | WhatsApp | Discord (Configured as per this guide) |
+    25→|------------|----------|----------------------------------------|
+    26→| **Structured channels** | Cluttered groups, single thread | Infinite channels in categories, each with specific purpose, permissions, and history |
+    27→| **Role-based access** | No native roles; all members see everything in group | Granular roles & permissions, private channels for HR, leadership, teams |
+    28→| **Message retention & search** | Endless scroll, no server-side search across groups | Full-text search across entire server, pinned messages, forum threads |
+    29→| **Integrations** | Minimal (business API for notifications only) | Webhooks, bots for GitHub, Jira, CI/CD, Google Calendar, custom apps |
+    30→| **Voice & video conferencing** | Limited to 8–32 people, no persistent rooms | Persistent voice channels, screen sharing, video, stage channels, 25–50 participants (up to 200 with Discord partnership) |
+    31→| **Knowledge management** | No pinning, no threads, no wikis | Pinned messages, threads, forum channels, rich embeds |
+    32→| **Automation & workflows** | Not possible | Bots can automate standups, leave requests, incident response, onboarding |
+    33→| **Onboarding** | Add member manually, no guided flow | Discord Onboarding with role selection, welcome screen, server guide |
+    34→| **Compliance & audit** | No logs, no oversight | Full audit logs, message logging (via bots), moderation actions, backups |
+    35→| **Professional tone** | Casual, limited control | Custom branding, server icon, welcome screen, organizational hierarchy |
+    36→| **Cost** | Free (but data siloed, no admin controls) | Free (with Nitro optional for some boosts) – enterprise-level feature set |
+    37→
+    38→**Business advantage:** Discord becomes the single hub where code, conversations, alerts, meetings, HR, and social connection coexist in one searchable, permission-controlled environment.
+    39→
+    40→## 1.2 Limitations & How to Mitigate
+    41→
+    42→| Limitation | Mitigation |
+    43→|------------|------------|
+    44→| Not HIPAA/ISO 27001 certified by default | Combine with data retention policies, avoid sharing PII in open channels, use private encrypted channels for sensitive docs. (Discord does use encryption in transit; at rest on servers). For strict compliance, keep sensitive data in HRMS, link to it. |
+    45→| No built-in calendar | Integrate Google Calendar via bot/webhooks; use Sesh bot for scheduling. |
+    46→| No threaded channel view like Slack (but Forum channels and Threads exist) | Use forums for long-lived discussions, threads for temporary conversations within channels. |
+    47→| File size limit 8 MB free, 100 MB Nitro | Store large files in Google Drive/Notion, link in Discord. |
+    48→| Search limited to 10k messages without Nitro? Discord search is global across server regardless of Nitro. | Use bots to log messages to external DB for long-term compliance if needed. |
+    49→| Offline messages limited | Not relevant for always-connected team. |
+    50→
+    51→## 1.3 Recommended Server Philosophy
+    52→
+    53→**Principle: “One Server, One Source of Truth.”**  
+    54→Every functional area gets a category; inside each category, channels follow a consistent naming convention.  
+    55→Everything that happens in the company happens here – code deployments, incident response, standups, leave requests, watercooler chat.
+    56→
+    57→**Operational Principles:**
+    58→- **Default to public channels** (within appropriate permissions) – transparency builds trust.
+    59→- **Use threads** to keep conversations focused.
+    60→- **Pin important references**, not every message.
+    61→- **No DMs for work-related discussions** – keep everything searchable.
+    62→- **Every message is a record** – write clearly, use templates.
+    63→
+    64→**Communication Principles:**
+    65→- **Respect channel purposes** – don't post memes in #deployments.
+    66→- **Use statuses & profiles** to indicate availability.
+    67→- **@-mentions only when necessary** – use role pings sparingly.
+    68→- **React with emojis** for acknowledgment (✅, 👀, 🚀).
+    69→
+    70→## 1.4 Architecture Overview (Mermaid Diagram)
+    71→
+    72→```mermaid
+    73→graph TD
+    74→    subgraph Discord Server
+    75→        A[Server Settings & Branding]
+    76→        B[Role Hierarchy]
+    77→        C[Categories & Channels]
+    78→        D[Permissions Matrix]
+    79→        E[Onboarding & Verification]
+    80→        F[Bots & Automations]
+    81→        G[Integrations: GitHub, Jira, Calendar]
+    82→        H[Security: AutoMod, Audit Log]
+    83→    end
+    84→    A --> B
+    85→    B --> C
+    86→    C --> D
+    87→    B --> D
+    88→    E --> B
+    89→    F --> G
+    90→    F --> H
+    91→    D --> H
+    92→    C --> G
+    93→```
+    94→
+    95→Everything flows from roles. A well-designed role architecture makes the entire server maintainable.
+    96→
+    97→---
+    98→
+    99→# PART 2 – SERVER CREATION & INITIAL SETTINGS
+   100→
+   101→## 2.1 Server Creation
+   102→
+   103→1. Open Discord desktop app or web (discord.com).
+   104→2. Click the **+** (plus) icon in the left server list (below all servers).
+   105→3. Choose **“Create My Own”** (not a template).  
+   106→   - *Why not a template?* Templates impose structure we will supersede. Full control from scratch.
+   107→4. **Server Name:** `Augment Infotech`  
+   108→   - Use company legal name. No emojis in official name (professionalism).
+   109→5. Click **Create**.
+   110→
+   111→You now own a blank server with a “general” text channel and a “General” voice channel.
+   112→
+   113→## 2.2 Server Settings – Step by Step
+   114→
+   115→Right-click the server icon (or click server name at top-left) → **Server Settings**.
+   116→
+   117→We will configure every tab in order.
+   118→
+   119→### 2.2.1 Overview
+   120→
+   121→- **Server Name:** `Augment Infotech` (already set)
+   122→- **Server Icon:** Upload a high-res company logo (512x512 PNG recommended).  
+   123→  *Recommendation: Use a clean icon with a dark/colorful background that stands out in the sidebar. Avoid text-heavy logos.*  
+   124→  Click **Upload Image**, select file. Ensure it looks good as a circle.
+   125→- **Server Banner:** (Requires Server Boost Level 2)  
+   126→  We will not rely on boosts initially. If available later, upload a branded banner (960x540, centered, no crucial text at edges). Right now, ignore.
+   127→- **Invite Background:** Same as banner, requires boost. Ignore.
+   128→- **AFK Channel:** Leave as “No AFK Channel” – we will create a dedicated idle channel later.
+   129→- **AFK Timeout:** Set to **30 minutes** (default is 5 minutes). This prevents people from being moved to AFK while on a coffee break.  
+   130→  Path: Server Settings → Overview → Inactive Timeout → 30 minutes.
+   131→- **System Messages Channel:** We will set this later to a private admin log channel. For now, leave default.
+   132→- **Server Description:** (visible in Discovery)  
+   133→  `Internal communication hub for Augment Infotech. Not accepting public members.`  
+   134→  We will later disable Discovery, but it’s good practice.
+   135→
+   136→Click **Save Changes** if prompted (Discord saves automatically but sometimes needs explicit save; it will show a green toast).
+   137→
+   138→### 2.2.2 Moderation
+   139→
+   140→- **Verification Level:**  
+   141→  Set to **“Highest – Must have a verified phone number on their Discord account.”**  
+   142→  *Why?* Internal company server – we want to ensure every employee has a phone-verified account to prevent fake/anonymous entries. This does not expose phone numbers to anyone. It’s a strong anti-spam measure.  
+   143→  Path: Server Settings → Moderation → Verification Level → “Highest”.
+   144→- **Explicit Media Content Filter:** Set to **“Scan media content from all members.”**  
+   145→  This uses Discord’s automatic detection for NSFW content. We don’t expect such content, but it’s a safety net.  
+   146→- **DM and Spam Protection:** (AutoMod)  
+   147→  We will configure AutoMod later (Part 16). For now, leave at defaults.
+   148→
+   149→### 2.2.3 Safety Setup (if prompted)
+   150→
+   151→Discord may offer a “Safety Setup” wizard after creation. You can dismiss it; we’ll manually configure everything.
+   152→
+   153→### 2.2.4 Default Notifications
+   154→
+   155→Path: Server Settings → Overview → Default Notification Settings
+   156→
+   157→- Set to **“Only @mentions”**.
+   158→  *Why?* Prevent notification overload. Users will only get pinged when directly mentioned or their role is pinged. They can manually override per channel if they want all messages.
+   159→
+   160→### 2.2.5 Inactive Channel
+   161→
+   162→Later we’ll create a dedicated `#afk-break-room` voice channel, and point AFK Channel to it.  
+   163→But for now, we won’t set it because we don’t want people moved without warning while still setting up.
+   164→
+   165→### 2.2.6 Community Settings
+   166→
+   167→**We will enable Community** for two critical features: **Onboarding** and **AutoMod**.  
+   168→Even though we are a private company, Community must be “on” to use Discord’s native Onboarding flow. We will disable public discovery and invite-only settings.
+   169→
+   170→Steps:
+   171→1. Server Settings → **Enable Community** (you’ll see a “Get Started” button).
+   172→2. A wizard starts:
+   173→   - **Step 1: Safety checks.** Email verification requirement? It already enforces Phone due to Highest verification; email is always required. Good.
+   174→   - **Step 2: Set up Rules or Guidelines channel.** We don’t have one yet. Select **“I’ll set this up later”** – we’ll create #rules manually.
+   175→   - **Step 3: Community updates channel.** We don’t need Discord’s community updates. Select **“I’ll set this up later”**.
+   176→   - **Step 4: Default channels to give “@everyone” permission.** We’ll customize, but for now accept defaults – we’ll lock down later.
+   177→3. Once Community is enabled, go back to Server Settings → **Community** tab.
+   178→   - **Server Discovery:** Toggle **OFF** (we do not want our server to appear in public Discovery).
+   179→   - **Welcome Screen:** Toggle **ON**. This is the landing screen new members see before they can chat. We’ll design it in Part 9 (Onboarding).
+   180→   - **Server Rules Channel:** Will be set later to `#rules`.
+   181→   - **Community Updates Channel:** Leave as “No Channel” – we don’t need it.
+   182→
+   183→### 2.2.7 Invite Management
+   184→
+   185→Go to Server Settings → **Invites** (or Instant Invite button).
+   186→
+   187→- Create a **permanent invite** for onboarding:  
+   188→  Click **Invite Members** (next to server name) → **Edit invite link** (gear icon).
+   189→  - **Expire After:** **Never** (we will manually revoke if needed).  
+   190→    *Alternative:* Set to 7 days and regenerate weekly, but for HR efficiency, permanent is fine combined with audit.
+   191→  - **Max Number of Uses:** **No limit**.
+   192→  - **Grant temporary membership:** Leave **OFF**.
+   193→  - Click **Generate a New Link**.
+   194→- Copy this link and store it in a secure location (password manager). This will be given to new employees during onboarding.
+   195→
+   196→- We will later restrict who can create invites to administrators only.
+   197→
+   198→### 2.2.8 Audit Log
+   199→
+   200→Access: Server Settings → **Audit Log** (tab on left).
+   201→
+   202→The Audit Log captures every administrative action (role creation, permission change, member kick, etc.). It is un-deletable and time-stamped.  
+   203→**Important:** Only users with “View Audit Log” permission can see it – we’ll grant that to admins and HR leads.
+   204→
+   205→We will later integrate a bot (Logger) that sends these events to a private log channel.
+   206→
+   207→## 2.3 Verification Checklist – Part 2
+   208→
+   209→- [ ] Server name set correctly
+   210→- [ ] Server icon uploaded, looks crisp
+   211→- [ ] Verification level = Highest (phone)
+   212→- [ ] Explicit content filter = all members
+   213→- [ ] Default notifications = only @mentions
+   214→- [ ] Community enabled, Discovery OFF
+   215→- [ ] Welcome Screen enabled (not configured yet)
+   216→- [ ] Permanent invite link generated and saved securely
+   217→- [ ] Audit log accessible (check it shows creation events)
+   218→
+   219→---
+   220→
+   221→# PART 3 – ROLE ARCHITECTURE
+   222→
+   223→## 3.1 Role Design Philosophy
+   224→
+   225→**Least Privilege + Clarity.**  
+   226→Each role serves a specific function. Department roles grant access to category-specific channels. Administrative roles grant global permissions only where necessary.
+   227→
+   228→We will use a **linear hierarchy** with “Administrator” at top, then “Moderator”, then “Leadership”, then department leads, then default employee, then restricted roles (contractor, intern, bot).  
+   229→**Discord role hierarchy is based on the position in the role list** (drag to reorder). The role higher in the list can manage roles below it (if they have Manage Roles permission) and see channels that are set to “@everyone” or lower roles, but permissions can override. We’ll set it so that:
+   230→
+   231→- Every employee (including contractors) has a base “Employee” role that grants access to common channels.
+   232→- Department-specific roles grant access to their private areas.
+   233→- Leadership roles grant access to management channels.
+   234→- Admin/Moderator roles grant moderation powers.
+   235→
+   236→## 3.2 Role List (Complete, in hierarchy order from top to bottom)
+   237→
+   238→| Display Name (Role Name) | Color | Permissions Summary | Assigned to |
+   239→|---------------------------|-------|---------------------|-------------|
+   240→| **Admin** | Red `#E74C3C` | Administrator (all permissions) – bypasses all channel restrictions | IT Admin, CTO (max 2 people) |
+   241→| **Moderator** | Orange `#E67E22` | Manage Messages, Kick, Ban, Manage Nicknames, Mute, View Audit Log, Manage Roles (only below Mod) | HR leads, trusted senior members |
+   242→| **Leadership** | Purple `#9B59B6` | Access to leadership channels, view audit log, manage some channels (not admin) | CEO, CTO, Department Heads |
+   243→| **Manager** | Blue `#3498DB` | Access to manager channels, ability to manage department channels, add/remove members from department roles (via bot) | Engineering Manager, Sales Manager, etc. |
+   244→| **HR** | Pink `#E91E63` | Full access to HR private category, manage member screening, kick (restricted) | HR team (2-3 members) |
+   245→| **IT Support** | Teal `#1ABC9C` | Manage server settings? No, just elevated visibility for tech support tickets. Actually we’ll handle via bot. So this role may have “View Audit Log” and access to IT channel. | IT admins (maybe same as Admin) |
+   246→| **Employee** (default) | Green `#2ECC71` | Read/write general channels, voice, react, embed links, attach files, use threads. No moderation. | Every full-time employee |
+   247→| **Contractor** | Grey `#95A5A6` | Same as Employee but restricted from sensitive channels (HR, finance, leadership). | External contractors |
+   248→| **Intern** | Light Blue `#5DADE2` | Same as Employee but cannot create invites, cannot mention @everyone. | Interns |
+   249→| **Bot** (for bot accounts) | Not displayed (color irrelevant) | Administrator or customized per bot. We assign each bot a dedicated role (e.g., “Carl-bot”, “GitHub”) to allow specific permissions. These sit at the bottom. | Bot integration accounts |
+   250→| **@everyone** | Default (grey) | **Deny all dangerous permissions.** We’ll assign nearly no permissions to @everyone; all access comes through roles. | All server members automatically |
+   251→
+   252→> **Role naming convention:** Use plain English, no symbols. Colors match department hue convention.
+   253→
+   254→## 3.3 Permission Matrix – Global Server Permissions per Role
+   255→
+   256→We will set permissions at the server level (Server Settings → Roles) and then refine per channel.  
+   257→Here’s the server-level baseline. “✓” = enabled (green check), “✗” = disabled (red cross), “/” = neutral (inherits, not set explicitly).
+   258→
+   259→| Permission | @everyone | Employee | Intern | Contractor | HR | Manager | Leadership | Moderator | Admin |
+   260→|------------|-----------|----------|--------|-------------|-----|---------|-------------|-----------|-------|
+   261→| **General Permissions** |
+   262→| View Channels | / | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   263→| Manage Channels | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ (except own) | ✗ | ✓ | ✓ |
+   264→| Manage Roles | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ (only roles below) | ✓ |
+   265→| Manage Webhooks | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✓ |
+   266→| Create Expressions | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   267→| Manage Expressions | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✓ |
+   268→| View Audit Log | ✗ | ✗ | ✗ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   269→| Manage Server | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ |
+   270→| **Membership Permissions** |
+   271→| Create Invite | ✗ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   272→| Change Nickname | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   273→| Manage Nicknames | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✓ | ✓ | ✓ |
+   274→| Kick Members | ✗ | ✗ | ✗ | ✗ | ✗ (except via bot) | ✗ | ✗ | ✓ | ✓ |
+   275→| Ban Members | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✓ |
+   276→| **Text Channel Permissions** |
+   277→| Send Messages | ✗ (we’ll deny @everyone globally, then allow via roles) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   278→| Send Messages in Threads | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   279→| Create Public Threads | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   280→| Create Private Threads | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   281→| Embed Links | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   282→| Attach Files | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   283→| Add Reactions | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   284→| Use External Emojis | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   285→| Use External Stickers | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   286→| Mention @everyone, @here, All Roles | ✗ | ✓ (but via policy) | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   287→| Manage Messages | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✓ |
+   288→| Manage Threads | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✓ |
+   289→| Read Message History | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   290→| Send TTS Messages | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
+   291→| Use Application Commands | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   292→| **Voice Permissions** |
+   293→| Connect | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   294→| Speak | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   295→| Video | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   296→| Use Activities | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   297→| Use Soundboard | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   298→| Use Voice Activity | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+   299→| Priority Speaker | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✓ |
+   300→| Mute Members | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✓ |
+   301→| Deafen Members | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✓ |
+   302→| Move Members | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✓ |
+   303→
+   304→**Important:** We deny `Send Messages` etc. at the @everyone level globally and then explicitly **allow** them on the Employee role and above. This prevents a member who somehow loses all roles from spamming; they’ll have no permissions. Also ensures that if we later add a new role, we don't accidentally give base permissions.
+   305→
+   306→### How to Configure Global Permissions:
+   307→
+   308→1. Go to Server Settings → **Roles**.
+   309→2. Click **@everyone** role. Under Permissions tab, scroll through each permission and set to **✗** (red) for everything except View Channels (set to **/ neutral**) – actually we should deny View Channels as well, but that would hide all channels unless explicitly allowed; we want per-channel overrides. So set View Channels to **/** (neutral) as default, then per-category we allow. The matrix above uses / for View Channels. We’ll later set category permissions to allow Employee role to view. So for @everyone: View Channels = / (no explicit allow or deny). All other = Deny (red cross).  
+   310→   *Double-check:* If we deny Send Messages globally to @everyone, and then allow for Employee, Employee members can send because role allow overrides the base deny. That works.
+   311→3. Create each role by clicking **Create Role** and naming it exactly as above, assigning color. Then edit its permissions using the matrix.
+   312→4. **Hierarchy:** Drag roles in the Roles list so Admin is at top, then Moderator, then Leadership, Manager, HR, IT Support (optional), Employee, Contractor, Intern, Bot roles, and @everyone at bottom.  
+   313→   (Actually, Employee should be above Contractor/Intern because they have broader access, but that only affects role management if someone can assign roles. Employee might not have Manage Roles, so position isn’t security-critical except for role management scope. We’ll keep Employee above restricted roles anyway.)
+   314→
+   315→**Pro Tip:** After setting all permissions, test by creating a dummy account and assigning only the Employee role. Attempt to send a message in a channel that you will later allow – should fail until you grant category permission.
+   316→
+   317→## 3.4 Role Assignment Policy
+   318→
+   319→- All members join with **only the Employee role** (or Intern/Contractor) after onboarding.
+   320→- The **Employee role** is assigned manually by HR/Admin after verification (or via Onboarding flow). We’ll use Discord’s Onboarding to auto-assign Employee if they select their department.
+   321→- Additional roles (Department roles) are assigned by department heads using a bot command or via HR.
+   322→- Leadership roles assigned by Admin only.
+   323→- Bot roles are assigned when adding bots.
+   324→
+   325→## 3.5 Example Color Scheme & Why
+   326→
+   327→| Color Hex | Role | Reason |
+   328→|-----------|------|--------|
+   329→| `#E74C3C` (Red) | Admin | Danger, ultimate authority – instantly recognizable |
+   330→| `#E67E22` (Orange) | Moderator | Warning, enforcement |
+   331→| `#9B59B6` (Purple) | Leadership | Regal, strategic |
+   332→| `#3498DB` (Blue) | Manager | Trust, stability |
+   333→| `#E91E63` (Pink) | HR | Compassion, confidentiality |
+   334→| `#2ECC71` (Green) | Employee | Go, active, life |
+   335→| `#95A5A6` (Grey) | Contractor | Neutral, external |
+   336→| `#5DADE2` (Light Blue) | Intern | Fresh, learning |
+   337→
+   338→This color scheme quickly signals seniority and department type in the member list.
+   339→
+   340→---
+   341→
+   342→# PART 4 – CATEGORY HIERARCHY DESIGN
+   343→
+   344→## 4.1 Category Structure Overview
+   345→
+   346→We will create categories that group channels logically. The order in the Discord sidebar is top to bottom.  
+   347→**Rule:** Most important categories for daily work should be at top. Social and archive at bottom.
+   348→
+   349→**Final Category List (ordered):**
+   350→1. **INFORMATION** (read-only, announcements, rules, onboarding)
+   351→2. **GENERAL** (company-wide chat, watercooler)
+   352→3. **ENGINEERING** (dev teams, standups, code)
+   353→4. **AI & DATA** (AI team specific)
+   354→5. **DEVOPS & INFRA** (DevOps, SRE)
+   355→6. **PRODUCT & PROJECT MANAGEMENT** (cross-team product discussions)
+   356→7. **SALES** 
+   357→8. **MARKETING**
+   358→9. **HR** (private HR affairs)
+   359→10. **MANAGEMENT** (leadership strategy, private)
+   360→11. **OPERATIONS** (office, WFH, leaves, IT support)
+   361→12. **VOICE LOUNGES** (voice channels, meeting rooms)
+   362→13. **FORUMS** (knowledge base, project discussions, bug tracking)
+   363→14. **BOTS & LOGS** (bot commands, logs, automations)
+   364→15. **ARCHIVE** (old inactive channels, read-only)
+   365→
+   366→Each category will have specific permission overrides to grant access based on roles.
+   367→
+   368→## 4.2 Category Permissions Principles
+   369→
+   370→- **Synchronized Permissions**: For categories, we will set permissions that apply to all channels in that category. Individual channels can then override if needed.
+   371→- **Access Control**: For private categories (HR, MANAGEMENT), we deny @everyone and only allow the specific role.
+   372→- **Visibility**: Everyone can see the category name but not the channels inside if denied. For truly confidential, we’ll set category to **Private** – only roles with access see the category at all. (Discord: If you deny View Channel for a category, the category disappears from sidebar for unauthorized users.)
+   373→
+   374→**Best Practice:** Use **Private Category** (deny @everyone View Channel) for HR, Management, and any sensitive area. For others, allow Employee role to view but restrict write where needed (like #announcements).
+   375→
+   376→## 4.3 Category-by-Category Breakdown
+   377→
+   378→### INFORMATION (Public, read-only for most)
+   379→
+   380→- **Purpose:** Company-wide updates, policies, rules, and onboarding.
+   381→- **Permissions:**  
+   382→  - @everyone: Read Messages ✓ (via role), Send Messages ✗, Add Reactions ✓ (to emoji-react to announcements)  
+   383→  - Employee+ : as above  
+   384→  - Admin/Mod: Manage Messages ✓
+   385→- **Channels inside:**
+   386→  - `#rules` (rules screening)
+   387→  - `#announcements` (official company announcements)
+   388→  - `#onboarding` (new hire steps, but onboarding will use Welcome Screen too)
+   389→  - `#company-policies` (HR policies, code of conduct)
+   390→  - `#it-support` (employee can post, but we might put in Operations; actually we’ll create a ticket system later)
+   391→
+   392→### GENERAL (Company-wide open chat)
+   393→
+   394→- **Permissions:** Employee+ can read and write, attach files, create threads.
+   395→- **Channels:**
+   396→  - `#general` (anything work-appropriate)
+   397→  - `#random` (memes, fun)
+   398→  - `#introductions` (new hires introduce themselves)
+   399→  - `#kudos` (peer recognition)
+   400→  - `#social-events`
+   401→
+   402→### ENGINEERING
+   403→
+   404→- **Permissions:** Only Engineering team role (we’ll create `Engineering` role) can see and participate. Category **private** (deny @everyone View Channel). Employee role does NOT have access; we use a specific `Engineering` department role assigned to engineers.
+   405→- **Channels:**
+   406→  - `#eng-general`
+   407→  - `#eng-standup`
+   408→  - `#eng-code-reviews`
+   409→  - `#eng-architecture`
+   410→  - `#eng-releases`
+   411→  - `#eng-incidents`
+   412→
+   413→Similarly for AI, DevOps, Sales, Marketing, each with a department role.
+   414→
+   415→### HR (Private)
+   416→
+   417→- **Private category**, only `HR` role and Admin can see.
+   418→- **Channels:**
+   419→  - `#hr-announcements`
+   420→  - `#hr-recruitment`
+   421→  - `#hr-onboarding`
+   422→  - `#hr-confidential`
+   423→  - `#hr-policy-drafts`
+   424→
+   425→### MANAGEMENT (Private)
+   426→
+   427→- Only `Leadership` and `Manager` roles can see.
+   428→- **Channels:**
+   429→  - `#management-strategy`
+   430→  - `#management-budget`
+   431→  - `#management-hiring`
+   432→  - `#management-board-updates`
+   433→
+   434→### OPERATIONS (Some private, some open)
+   435→
+   436→- Category visible to all employees, but some channels might be write-restricted.
+   437→- **Channels:**
+   438→  - `#ops-office` (office updates, hybrid schedule)
+   439→  - `#ops-wfh` (work-from-home requests, visibility HR/Manager only? We’ll set write for everyone but only HR/Manager can see? Actually we want a leave request system via bot later.)
+   440→  - `#ops-leaves` (leave announcements, integrated with bot)
+   441→  - `#ops-it-tickets` (ticket system)
+   442→
+   443→### VOICE LOUNGES (Voice channels, not text category but category with voice)
+   444→
+   445→- **Category type:** Contains voice channels. Permissions: Connect, Speak for Employee+.
+   446→- **Channels:**
+   447→  - `🔊 General Voice`
+   448→  - `🔊 Meeting Room 1`, `2`, `3`
+   449→  - `🔊 Focus Room` (music, no mic required)
+   450→  - `🔊 Break Room` (AFK)
+   451→  - `🔊 Town Hall Stage` (Stage channel)
+   452→
+   453→### FORUMS
+   454→
+   455→- We will use Forum Channels, which live under a category. We’ll create a category “FORUMS” to hold them.
+   456→- **Purpose:** Persistent threaded discussions, knowledge base, project hubs.
+   457→- **Channels (each a forum):**
+   458→  - `📋 Project Discussions`
+   459→  - `🐛 Bug Tracker`
+   460→  - `💡 Ideas & Innovation`
+   461→  - `📚 Knowledge Base`
+   462→  - `📅 Meeting Notes` (could be forum threads per date)
+   463→
+   464→### BOTS & LOGS (private to admin/moderator, logs read-only for leadership maybe)
+   465→
+   466→- **Category private**, visible only to Admin, Moderator, Leadership.
+   467→- **Channels:**
+   468→  - `#bot-commands` (where users interact with bots; we might put a public bot-commands channel in General instead)
+   469→  - `#admin-logs` (audit bot log)
+   470→  - `#mod-logs` (moderation actions)
+   471→  - `#join-leave-log`
+   472→
+   473→### ARCHIVE
+   474→
+   475→- **Read-only** for all roles. Admin can manage. Used to store old channels.
+   476→- **Channels:** None initially.
+   477→
+   478→## 4.4 When to Create vs Not Create a Category
+   479→
+   480→- **Create** when a group of channels serves a distinct functional area with different access requirements.
+   481→- **Do not create** a category for a single temporary project; use a channel with threads or a forum post instead.
+   482→- **Avoid** overly granular categories like “Design”, “QA” unless you have a dedicated team with sensitive discussions; they can share Engineering.
+   483→
+   484→---
+   485→
+   486→# PART 5 – CHANNELS: FULL SPECIFICATIONS
+   487→
+   488→For each channel we’ll detail its configuration. We’ll start with INFORMATION category channels.
+   489→
+   490→## 5.1 #rules (Text Channel in INFORMATION)
+   491→
+   492→- **Name:** `rules`
+   493→- **Type:** Text Channel
+   494→- **Description (channel topic):** `Server rules and code of conduct. Please read and acknowledge.`
+   495→- **Purpose:** Display rules; members must accept before accessing server (enforced via Rules Screening). Only admins post updates.
+   496→- **Who can read:** Everyone (Employee role and above).
+   497→- **Who can write:** Admin, Moderator, Leadership (via channel permission override: Add role Leadership, allow Send Messages; @everyone deny Send Messages).
+   498→- **Slowmode:** 1 minute (prevents spam during rule changes).
+   499→- **Pins:** Keep one pinned message with the current rules version.
+   500→- **Recommended first message (pinned):**  
+   501→  ```
+   502→  Welcome to Augment Infotech official Discord server.
+   503→  Please read and follow these rules:
+   504→  1. Be respectful...
+   505→  ```
+   506→- **Channel Topic:** `Current version: v1.0. Last updated: [date].`
+   507→- **Threads:** Disabled (no need).
+   508→
+   509→## 5.2 #announcements (Announcement Channel type)
+   510→
+   511→Discord has a dedicated **Announcement Channel** type that allows publishing messages to other servers (we don't need that), but we’ll use it because it has a different look (newspaper icon) and allows followers. We can disable the publishing feature.
+   512→
+   513→- **Name:** `announcements`
+   514→- **Type:** Announcement Channel
+   515→- **Description:** `Official company-wide announcements. Only Admins and Leadership can post.`
+   516→- **Who can read:** All employees.
+   517→- **Who can write:** Admin, Leadership, Manager (maybe). We’ll set: @everyone deny Send Messages; allow for Leadership, Admin.
+   518→- **Slowmode:** Off.
+   519→- **Pins:** Critical announcements get pinned temporarily.
+   520→- **First Message:** A welcome announcement explaining this is the source of truth for company news.
+   521→- **Threads:** Enable, but only for follow-up discussions. Employees can create threads on announcements to discuss, but not in main channel.
+   522→- **Permission note:** In Announcement channels, the “Send Messages” permission becomes “Send Announcements”. Regular members can’t send.
+   523→
+   524→## 5.3 #onboarding (Text, read-only)
+   525→
+   526→- **Name:** `onboarding`
+   527→- **Purpose:** Static guide for new hires. Actually, we’ll use Discord’s Onboarding flow; this channel can contain links to resources. Write-restricted.
+   528→- **Who writes:** Admin, HR.
+   529→- **Read access:** Everyone.
+   530→
+   531→## 5.4 #company-policies
+   532→
+   533→- Similar, read-only.
+   534→
+   535→## 5.5 GENERAL channels
+   536→
+   537→### #general
+   538→
+   539→- **Permissions:** Employee+ can read, write, attach, embed.
+   540→- **Slowmode:** 5 seconds (prevents accidental spam, but conversational).
+   541→- **Topic:** `Company-wide conversations. Keep it professional and inclusive.`
+   542→- **Threads:** Enabled; encourage using threads for tangential discussions.
+   543→
+   544→### #random
+   545→
+   546→- Same but with relaxed topic `Memes, fun, off-topic. Keep it SFW.`
+   547→
+   548→### #introductions
+   549→
+   550→- **Write:** Employee+.
+   551→- **Pinned message template:**
+   552→  ```
+   553→  Please introduce yourself:
+   554→  - Name:
+   555→  - Role:
+   556→  - Department:
+   557→  - Fun fact:
+   558→  ```
+   559→- **Threads:** Off (each intro should be a separate message).
+   560→
+   561→### #kudos
+   562→
+   563→- Employee+ can write. Format: `@username kudos for [reason] 🎉`; reactions encouraged.
+   564→
+   565→### #social-events
+   566→
+   567→- Post events, polls.
+   568→
+   569→## 5.6 Department Category Channels (Example: ENGINEERING)
+   570→
+   571→Assume we created `Engineering` role with color #F1C40F, assigned to all engineers.
+   572→
+   573→Category: ENGINEERING (private, deny @everyone, allow Engineering role View Channel and Send Messages).
+   574→
+   575→### #eng-general
+   576→
+   577→- Chat for engineers.
+   578→- **Slowmode:** off.
+   579→
+   580→### #eng-standup
+   581→
+   582→- **Purpose:** Daily async standup. We’ll use a bot (Standup Bot) that prompts each member. But the channel is where threads of standup reside.
+   583→- **Who can write:** Engineering role.
+   584→- **Channel Topic:** `Daily standup – post your update using /standup command. Threads per day.`
+   585→- **Threads:** The bot will create a thread for each day’s standup.
+   586→
+   587→### #eng-code-reviews
+   588→
+   589→- **Purpose:** Request code reviews, share PRs. Integrate with GitHub bot to auto-post PR links.
+   590→- **Permissions:** Engineering role.
+   591→- **Threads:** Each PR creates a thread.
+   592→
+   593→### #eng-architecture
+   594→
+   595→- Long-form discussions, use threads heavily.
+   596→
+   597→### #eng-releases
+   598→
+   599→- Announcement channel type inside engineering? Or regular text with restricted write for leads. **Announcement Channel** type so only leads post release notes, others discuss in threads. That’s good.
+   600→
+   601→### #eng-incidents
+   602→
+   603→- Critical, real-time. Write for Engineering, but we will use a dedicated incident command (bot) that creates a voice channel and text channel. We’ll cover later.
+   604→
+   605→## 5.7 Voice Channels Details
+   606→
+   607→### 🔊 General Voice
+   608→
+   609→- No topic; just a hangout. Everyone can join.
+   610→
+   611→### 🔊 Meeting Room 1, 2, 3
+   612→
+   613→- **Permissions:** Employee+ can connect. Mute others? No.  
+   614→- **Bitrate:** 64kbps (default).  
+   615→- **Region:** Automatic.  
+   616→- **Video:** Allowed.  
+   617→- **Noise suppression:** Discord built-in Krisp enabled by default for everyone.  
+   618→- **Recording:** Discord doesn’t have native recording; we’ll use bots like Craig for recording meetings (optional). Note Craig requires invite. We’ll cover later.
+   619→
+   620→### 🔊 Focus Room
+   621→
+   622→- **Permissions:** Connect, Speak (but users can mute themselves). We can set “Push to Talk” only? Not a Discord channel setting; we’ll advise users to use push-to-talk.  
+   623→- **Bitrate:** 64kbps.  
+   624→- **Purpose:** Coworking with music.
+   625→
+   626→### 🔊 Break Room (AFK)
+   627→
+   628→- Set as the AFK Channel in Server Settings → Overview.  
+   629→- **Permissions:** Connect for everyone, Speak allowed. No one is forced to be here; AFK move happens after 30 minutes of inactivity (set earlier).
+   630→
+   631→### 🔊 Town Hall (Stage Channel)
+   632→
+   633→- **Type:** Stage Channel.
+   634→- **Purpose:** All-hands meetings. Only designated speakers (Leadership) can talk; audience can listen and request to speak.
+   635→- **Setup:** Create Stage Channel. Go to its settings → Stage Moderators: add Leadership, Moderator, Admin roles. Everyone else is audience.  
+   636→- **Topic:** `Monthly all-hands meeting.`
+   637→
+   638→## 5.8 Permissions Inheritance and Locking
+   639→
+   640→We will set category-level permissions that propagate. Then for specific channels like #announcements, we override to deny send to @everyone and allow Leadership. Remember: channel-specific overrides always win.
+   641→
+   642→**Private Category Setup Steps (for HR):**
+   643→1. Create category “HR”.
+   644→2. In category settings → Permissions:
+   645→   - Role @everyone: Deny View Channel, Deny Connect.
+   646→   - Role HR: Allow View Channel, Allow Send Messages, Connect, etc.
+   647→3. All channels inside inherit and remain hidden from non-HR.
+   648→
+   649→**Test:** Ask a non-HR member if they see the category. They should not.
+   650→
+   651→---
+   652→
+   653→# PART 6 – FORUM CHANNELS
+   654→
+   655→Forum channels are top-level posts with tags, threads, and a rich layout.
+   656→
+   657→## 6.1 Project Discussions Forum
+   658→
+   659→- **Category:** FORUMS
+   660→- **Name:** `📋 Project Discussions`
+   661→- **Permissions:** Visible to all employees, post allowed for all.
+   662→- **Guidelines (set in forum settings):** “Start a post for each project to discuss updates, blockers, decisions. Use tags.”
+   663→- **Tags (required):**
+   664→  - `Project-Name` (e.g., `Project-Genesis`, `Project-Lighthouse`)
+   665→  - `Status: Active`, `Status: Completed`, `Status: On Hold`
+   666→  - `Type: Technical`, `Type: Business`
+   667→- **Default Reaction:** 👍 (upvote)
+   668→- **Post Template (in forum settings):**
+   669→  ```
+   670→  **Project Name:**
+   671→  **Description:**
+   672→  **Current Status:**
+   673→  **Next Milestone:**
+   674→  ```
+   675→- **Threads:** For each post, discussion happens in threads, but forum posts themselves act as the root. Good.
+   676→
+   677→## 6.2 Bug Tracker Forum
+   678→
+   679→- **Name:** `🐛 Bug Tracker`
+   680→- **Tags:** `Bug`, `Feature Request`, `Security`, `UI`, `Backend`, `AI`, `DevOps`, `Priority: Critical`, etc.
+   681→- **Template:**
+   682→  ```
+   683→  **Environment:**
+   684→  **Steps to Reproduce:**
+   685→  **Expected Result:**
+   686→  **Actual Result:**
+   687→  **Screenshots/Logs:**
+   688→  ```
+   689→- **Permissions:** All employees can post bugs. Engineering role can manage (edit/delete?) Actually forum moderation limited; we can assign a moderator.
+   690→
+   691→## 6.3 Ideas & Innovation
+   692→
+   693→- **Name:** `💡 Ideas`
+   694→- **Tags:** `Process`, `Product`, `Culture`, `Tech`
+   695→- **Template:** Title: [Idea], then details.
+   696→
+   697→## 6.4 Knowledge Base
+   698→
+   699→- **Name:** `📚 Knowledge Base`
+   700→- **Purpose:** Written guides, how-tos, documentation. Only selected experts can post; everyone can read.
+   701→- **Permissions:** Posting restricted to specific roles (e.g., “Knowledge Contributors” role we can create). Or we’ll manually manage by pinning authoritative posts.
+   702→
+   703→## Best Practices for Forums:
+   704→
+   705→- Use **required tags** so every post is categorised.
+   706→- Pin a “Welcome” post explaining usage.
+   707→- Set slowmode for posting if spam is a concern.
+   708→- Encourage reacting with ✅ when bug is fixed.
+   709→
+   710→---
+   711→
+   712→# PART 7 – VOICE CHANNELS (Additional Details)
+   713→
+   714→## 7.1 Noise Suppression, Video, and Screen Sharing
+   715→
+   716→Discord offers **Krisp noise suppression** in Voice & Video settings. Users enable per account. We’ll include in onboarding guide to enable Krisp.
+   717→
+   718→**Video:** HD video streaming available. In a voice channel, users can turn on camera or share screen. No server setting needed, but we can restrict video usage to certain roles via permission “Video”. We’ll leave it allowed for all employees.
+   719→
+   720→**Screen Share:** Source quality up to 720p 30fps for free, higher with Nitro. Recommend using for presentations.
+   721→
+   722→## 7.2 Stage Channel Management
+   723→
+   724→- For Town Hall, create a Stage channel.
+   725→- Assign **Stage Moderators** (Leadership, Admin). They can add/remove speakers.
+   726→- Set **Audience** as @everyone (but they can only listen).
+   727→- You can allow “Request to Speak” – users raise hand, moderators approve.
+   728→
+   729→## 7.3 Focus Rooms & Music
+   730→
+   731→- In a Focus Room, users can join and play lo-fi music via a bot like **Groovy** (no longer available? Use **Hydra**? Actually, music bots are tricky now due to YouTube TOS. Instead, users can share their screen with audio from Spotify. So no bot needed.)
+   732→
+   733→## 7.4 Recording Considerations
+   734→
+   735→- No native recording. Use bot **Craig** (invite, records to cloud). We’ll install Craig with permissions to join voice, record. Note: Consent required. We’ll have a policy.
+   736→
+   737→---
+   738→
+   739→# PART 8 – PERMISSIONS DEEP DIVE
+   740→
+   741→## 8.1 Every Discord Permission Explained
+   742→
+   743→| Permission | Risk | Our Setting |
+   744→|------------|------|-------------|
+   745→| **Administrator** | Grants all permissions, bypasses channel-specific denies. | Only Admin role. |
+   746→| **View Audit Log** | See all actions. | HR, Leadership, Mod, Admin. |
+   747→| **Manage Server** | Change server name, region, etc. | Admin only. |
+   748→| **Manage Roles** | Create, edit, delete roles below hierarchy. | Admin, Moderator (but limited). |
+   749→| **Manage Channels** | Edit channel settings. | Admin, Moderator, maybe Manager for department channels. |
+   750→| **Kick/Ban** | Remove members. | Moderator, Admin. |
+   751→| **Create Invite** | Make instant invites. | Employee+ (trusted). Could restrict to HR/Admin to control join, but then employees can’t invite bots? For bot invites, admin does it. So we set Create Invite to Admin, Leadership, HR, Manager, and deny Employee. That prevents random invites. But then how do employees share server? They don’t need to; only HR onboards. So deny Employee. |
+   752→| **Change Nickname** | Alter display name. | Allow Employee+. |
+   753→| **Manage Nicknames** | Change others’ nicknames. | Mod, Admin. |
+   754→| **Manage Webhooks** | Create webhooks in channels. | Admin, Leadership? Actually we may want webhook creation limited to admins to avoid abuse. But some integrations need webhooks; we’ll create them. So only Admin. |
+   755→| **Manage Expressions** | Add/remove emoji/stickers. | Admin, maybe Mod. |
+   756→| **View Channels** | See channel list. | We’ll allow via roles selectively. |
+   757→| **Send Messages** | Chat. | Employee+. |
+   758→| **Embed Links** | Auto-embed. | Employee+. |
+   759→| **Attach Files** | Upload. | Employee+. |
+   760→| **Read Message History** | See past messages. | Employee+. |
+   761→| **Use Application Commands** | Slash commands. | Employee+. |
+   762→| **Connect** | Join voice. | Employee+. |
+   763→| **Speak** | Talk. | Employee+. |
+   764→| **Video** | Camera. | Employee+. |
+   765→| **Use Activities** | Play built-in games. | Employee+. |
+   766→| **Move Members** | Drag between voice. | Mod, Admin. |
+   767→| **Priority Speaker** | Lower volume of others when talking. | Admin, Leadership during meetings. |
+   768→
+   769→## 8.2 Permission Inheritance and Overrides Walkthrough
+   770→
+   771→- Server level roles set baseline.
+   772→- Category permissions are set via **Edit Category → Permissions**. A green check means **Allow**, red cross means **Deny**, grey slash means **Inherit** (no override).
+   773→- Channel-specific overrides done similarly.
+   774→- **Resolution:** For a member, if any of their roles has **Allow** for a permission and no role has **Deny**, it’s allowed. If multiple roles have Deny, Deny wins. Administrator bypasses all Deny.
+   775→
+   776→**Example:** HR category: @everyone Deny View Channel. HR role Allow View Channel. A member with only Employee role sees Deny → cannot see category. A member with HR role sees Allow → can see.
+   777→
+   778→**Best Practice:** Always set Deny at category for sensitive categories to close visibility.
+   779→
+   780→## 8.3 Private Categories: Step-by-Step
+   781→
+   782→1. Right-click category → **Edit Category**.
+   783→2. **Permissions** tab.
+   784→3. Click **Add a role** → @everyone.
+   785→4. Set **View Channel** to ❌ (Deny).
+   786→5. Add the roles that should have access (e.g., HR), set View Channel to ✅ (Allow), also Send Messages, Connect etc. as needed.
+   787→6. Save. The category now disappears for unauthorized.
+   788→
+   789→**Double-check:** The category’s channels also inherit; no need to set individually unless you want to sub-restrict.
+   790→
+   791→## 8.4 HR Privacy, Finance Privacy
+   792→
+   793→We don’t have a Finance department listed, but we can include a private `#finance` channel under Management or HR. We’ll add a `Finance` role if needed.
+   794→
+   795→**Locked Channel Example:** `#hr-confidential` – only HR and Admin can view, not even Leadership. So set category HR to allow HR, but inside this channel, add a permission override denying Leadership role View Channel. That overrides category.
+   796→
+   797→## 8.5 Announcement Channels Restrictions
+   798→
+   799→Discord’s Announcement channel: “Send Messages” permission becomes “Send Announcements”. Regular members can still react and create threads (if allowed). So we allow employees to create threads for discussion. That’s fine.
+   800→
+   801→## 8.6 Cross-Department Visibility
+   802→
+   803→For channels like `#project-x` that Engineering and Marketing both need, we could create a **private channel** not under a department category, and grant both roles. Or use a shared category “COLLABORATION” with cross-role access. We’ll design that later.
+   804→
+   805→---
+   806→
+   807→# PART 9 – ONBOARDING & OFFBOARDING
+   808→
+   809→## 9.1 Discord Onboarding Feature
+   810→
+   811→Since Community enabled, we get **Onboarding** in Server Settings. This creates a step-by-step flow when a new member joins.
+   812→
+   813→### Setup:
+   814→
+   815→1. Server Settings → **Onboarding**.
+   816→2. **Welcome Screen** is what they see before completing onboarding. Enable it. Design:
+   817→   - **Title:** “Welcome to Augment Infotech!”
+   818→   - **Description:** “Your company hub for communication, code, and collaboration. Let’s get you set up.”
+   819→   - **Channels to feature:** Add `#rules` (so they see it), `#announcements`, `#onboarding`.
+   820→   - **Suggestions:** We can add “Start Here” button that points to #onboarding.
+   821→3. **Default Channels** (channels everyone gets on join): Select only `#rules` and maybe `#general` and `#random`? But we want them to get full access after role selection. Actually Discord Onboarding allows you to present a **Role Selection** step that assigns roles. So we’ll set default channels to minimal, then after role selection they unlock department channels.
+   822→   - So in Default Channels, we select the INFORMATION category channels that are read-only, and General channels. That ensures they can read announcements and rules immediately.
+   823→4. **Role Selection:** Add questions.
+   824→   - **Question:** “What department are you in?”  
+   825→     - Options: Engineering, AI, DevOps, HR, Sales, Marketing, Management, Operations.  
+   826→     - Each option can assign a **role** (e.g., Engineering role). We’ll create those department roles if not already.  
+   827→     - Multiple selection? No, single department primary.  
+   828→   - **Question:** “Are you a Manager?” → Assign Manager role if yes.
+   829→   - After selection, they get the roles, and the Onboarding automatically shows the appropriate channels based on role permissions.
+   830→   - We must ensure department categories are set up with the correct role access so they appear after role assignment.
+   831→5. **Rules Screening:** We must have a Rules Screening step. Enable it in Server Settings → **Safety Setup** → **Enable Membership Screening**.  
+   832→   - Add rules that members must accept. Example: “I agree to follow the company code of conduct.” They must click a checkbox.
+   833→   - This step runs before they can see any channel.
+   834→6. **Verification:** Already handled by phone verification level. No extra action.
+   835→
+   836→## 9.2 New Employee SOP (Standard Operating Procedure)
+   837→
+   838→**Pre-requisites:** HR sends Discord invite link to new hire via email.
+   839→
+   840→**Steps performed by HR/Admin before employee joins:**
+   841→- Ensure employee’s Discord account ID or email is known? Not required; invite link allows any phone-verified account. If we want to restrict to a specific email domain, we can’t natively; we trust invite link distribution.
+   842→
+   843→**On Employee’s first login:**
+   844→1. Employee clicks invite → accepts.
+   845→2. They see Welcome Screen with server rules. They must read and click “Complete” (checkbox agreement).
+   846→3. They go through Onboarding: select department, manager status.
+   847→4. Discord automatically assigns roles and reveals channels.
+   848→5. A custom welcome message (via bot) is sent to #introductions prompting them to introduce themselves. (We’ll set up Carl-bot autorole welcome.)
+   849→6. HR or Manager verifies the employee has correct access; assign any additional roles (like project-specific) manually.
+   850→
+   851→**HR checklist:**
+   852→- [ ] Employee accepted rules screening.
+   853→- [ ] Department role assigned correctly.
+   854→- [ ] Add to any private project channels if needed.
+   855→- [ ] Direct them to #onboarding for next steps (setting up integrations, profiles).
+   856→
+   857→## 9.3 Offboarding SOP
+   858→
+   859→When an employee leaves:
+   860→1. HR/Admin removes all roles from the member (or kicks them).  
+   861→   *Better:* Remove all roles except maybe a “Past Employee” or just kick. Kicking removes from server, but we can keep messages they sent. We’ll use ban with message deletion only for hostile departures.
+   862→2. **Standard:** Right-click member → **Kick**. This removes them; their messages stay unless we chose to delete. No “remove” option that keeps messages but without roles? Kicking removes membership; messages remain with “Deleted User” attribution. That’s acceptable.
+   863→3. **Access revocation:** If they had access to sensitive GitHub repos etc., coordinate with IT.
+   864→4. **Audit log:** Ensure kick action logged.
+   865→5. **Bot logs:** Remove from any bot-managed lists (standup, etc.).
+   866→6. **Data retention:** No action needed; messages stay as per company policy.
+   867→
+   868→---
+   869→
+   870→# PART 10 – AUTOMATION & INTEGRATIONS
+   871→
+   872→## 10.1 Webhooks Primer
+   873→
+   874→A webhook is a URL that lets external services post messages to a Discord channel.  
+   875→To create: Channel settings → **Integrations** → **Webhooks** → **New Webhook**. Name it, copy URL. Paste in third-party service.
+   876→
+   877→## 10.2 GitHub Integration
+   878→
+   879→**Goal:** Post commits, pull requests, issues, deployments to dedicated channels.
+   880→
+   881→**Method 1:** Use official Discord webhook integration (GitHub can send events to webhook).
+   882→- In GitHub repo → Settings → Webhooks → Add webhook → Payload URL: Discord webhook URL with `/github` at end (Discord automatically supports GitHub format). Content type: application/json. Which events? “Send me everything” or select: pushes, pull requests, issues.
+   883→- This posts rich embeds to the channel.
+   884→
+   885→**Method 2:** Use Discord’s official GitHub bot “GitHub” (the integration app). It can be invited and linked to repos. It posts notifications and allows `/github` commands. We’ll install it:
+   886→- Go to Server Settings → Integrations → **GitHub** → Add to Server. Authorize.
+   887→- Then link repositories: you can use `/github subscribe owner/repo` in a channel.
+   888→- That’s recommended for full feature.
+   889→
+   890→**Channels:**
+   891→- `#eng-releases` gets deployment notifications.
+   892→- `#eng-code-reviews` gets PR notifications.
+   893→- `#bot-commands` for slash commands.
+   894→
+   895→## 10.3 Jira Integration
+   896→
+   897→Official Jira Cloud app for Discord: Invite via **App Directory** (Jira Cloud). Once added, you can configure to post issue updates to a channel. Use `/jira setup` in a channel. We’ll set it to post to a `#project-updates` channel.
+   898→
+   899→## 10.4 GitLab Integration
+   900→
+   901→Similar webhook; or use “GitLab” app.
+   902→
+   903→## 10.5 Azure DevOps
+   904→
+   905→Webhook: In Azure DevOps, Service Hooks → Webhook → paste Discord webhook URL. Format specific message using JSON. Might need a Discord webhook proxy to transform payload, but basic is possible.
+   906→
+   907→## 10.6 Google Calendar Integration
+   908→
+   909→Use a bot like **Sesh** (scheduling) or **DisCal**. DisCal can create events in a voice channel and send reminders. We’ll use DisCal:
+   910→- Invite DisCal bot, use `/discal setup` to link Google Calendar. It will post upcoming events in a channel like `#calendar`.
+   911→
+   912→## 10.7 Google Drive, Notion, Linear, ClickUp
+   913→
+   914→- **Google Drive:** Native Discord doesn’t embed Drive files like Slack. Use webhook to post links. Or use a bot that monitors Drive folder for changes (via Zapier, Make).
+   915→- **Notion:** Use Notion’s API + Discord webhook via Zapier. When a Notion page is updated in a certain database, post to `#documentation` channel.
+   916→- **Linear:** Use Linear’s Discord integration (official) that posts issue updates.
+   917→- **ClickUp:** Webhook available; push to Discord webhook URL.
+   918→
+   919→## 10.8 Slack Bridge (if migrating)
+   920→
+   921→We want to replace WhatsApp, not Slack. If some teams still use Slack temporarily, we could bridge using a bot like **Matterbridge**, but not recommended. Just enforce cutover.
+   922→
+   923→## 10.9 CI/CD & Deployment Notifications
+   924→
+   925→From GitHub Actions, GitLab CI, Jenkins, etc., use webhooks to post build status.  
+   926→Example GitHub Actions step:
+   927→```yaml
+   928→- name: Discord notification
+   929→  env:
+   930→    DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+   931→  uses: Ilshidur/action-discord@master
+   932→  with:
+   933→    args: 'Project {{ EVENT_PAYLOAD.repository.full_name }} deployed successfully.'
+   934→```
+   935→Channel: `#deployments` (we’ll create in Engineering or DevOps).
+   936→
+   937→## 10.10 Incident Notifications
+   938→
+   939→Integrate monitoring (Datadog, Grafana) with webhook. A dedicated `#incidents` channel receives alerts. Set channel to notify @here or a role `SRE` (we’ll create) when an incident opens.
+   940→
+   941→## 10.11 Statuspage Integration
+   942→
+   943→If using Atlassian Statuspage, webhook can post to `#status` channel for outage updates.
+   944→
+   945→## 10.12 Step-by-Step Example: Setting Up GitHub Webhook
+   946→
+   947→1. Go to desired channel, click gear → Integrations → Webhooks → New Webhook.
+   948→2. Name: “GitHub PRs”. Copy URL.
+   949→3. In GitHub repo → Settings → Webhooks → Add webhook.
+   950→4. Payload URL: paste, add `/github` at end.
+   951→5. Content type: application/json.
+   952→6. Events: “Let me select” → Pull requests, Pushes.
+   953→7. Add webhook. Test with a dummy push.
+   954→
+   955→---
+   956→
+   957→# PART 11 – BOTS: RECOMMENDATIONS & CONFIGURATION
+   958→
+   959→## 11.1 Bot Invite and Permission Principles
+   960→
+   961→- All bots get a dedicated role (e.g., “Carl-bot”) with only the permissions they need.
+   962→- Place bot role below Admin but above @everyone.
+   963→- Never give a bot Administrator permission unless absolutely required (some moderation bots need it). Prefer granular.
+   964→
+   965→## 11.2 Bot Catalog
+   966→
+   967→| Bot | Purpose | Permissions Needed | Role Name |
+   968→|-----|---------|-------------------|-----------|
+   969→| **Carl-bot** | Reaction roles, welcome messages, auto-mod, logging, custom commands | Manage Roles, Manage Messages, View Channels, Send Messages, Read History, Embed Links, Add Reactions | Carl-bot |
+   970→| **Ticket Tool** | HR/IT support ticket system | Manage Channels, Manage Roles, Send Messages, Read History | Ticket Tool |
+   971→| **Sesh** | Event scheduling, calendar reminders | Send Messages, Embed Links | Sesh |
+   972→| **Apollo** | (Optional) Analytics dashboard? Actually Apollo is a community management bot, not needed. We'll skip. |
+   973→| **Statbot** | Server statistics, member count graphs | View Channels, Send Messages | Statbot |
+   974→| **Discohook** | Bookmarking messages, saving reminders, etc. Utility. | Send Messages, Embed Links | Discohook |
+   975→| **GitHub (official)** | Already integrated. | Read Messages, Send Messages, Embed Links | GitHub |
+   976→| **Simple Poll** | Create polls | Send Messages, Add Reactions | Poll Bot |
+   977→| **Reminder Bot** | Set reminders | Send Messages | Reminder |
+   978→| **AI Bot (Custom)** | Internal GPT, knowledge search (custom built) | Send Messages, Use Application Commands, Embed Links, Attach Files | AI Assistant |
+   979→| **Logger Bot** | Message logging, join/leave logs, to channel | View Audit Log, Manage Webhooks? Actually logs via API, we’ll use a bot like Logger or Dyno. We’ll use Carl-bot for logs. | Carl-bot (already) |
+   980→| **Moderation (AutoMod)** | Discord built-in, plus Carl-bot moderation. | | |
+   981→| **Backup Bot** (e.g., **Xenon**) | Server backup templates | Administrator (to read all settings) – but careful. We’ll manually backup using template feature. | Backup |
+   982→
+   983→## 11.3 Carl-bot Setup Guide
+   984→
+   985→1. Go to [carl.gg](https://carl.gg) and invite Carl-bot to server. Select server, authorize with permissions: Manage Roles, Manage Messages, etc.
+   986→2. Bot joins; assign it the “Carl-bot” role (color doesn't matter) with the needed permissions. Ensure role hierarchy allows it to manage roles below it.
+   987→3. **Welcome Messages:**
+   988→   - Command: `!welcome channel #introductions` (set the channel).
+   989→   - Customize with embed: `!welcome message Welcome {user} to Augment Infotech! Please introduce yourself.`
+   990→4. **Reaction Roles:** We’ll use to assign department roles optionally as backup.
+   991→   - Create a message in #roles channel (make one), add reactions, set up via `!reactionrole add <emoji> <role>`.
+   992→5. **Logging:** `!log channel #admin-logs` to set where events go. Then enable events: member join/leave, message delete, etc.
+   993→   - `!log enable member_join` etc.
+   994→   - Ensure #admin-logs is private.
+   995→
+   996→## 11.4 Ticket Tool Setup
+   997→
+   998→1. Invite Ticket Tool bot (tickettool.xyz).
+   999→2. It creates a “Tickets” category and panel. Use `/setup` command.
+  1000→3. Customize: categories like “HR Request”, “IT Support”, “General Inquiry”.
+  1001→4. Set which roles can see tickets (HR for HR tickets, etc.).
+  1002→5. Embed a message in `#support` channel where users click button to open ticket.
+  1003→
+  1004→## 11.5 Sesh for Scheduling
+  1005→
+  1006→- Invite Sesh, use `/sesh create` to make events. It can post in a `#calendar` channel.
+  1007→- Integrate with Google Calendar: `/sesh link` to connect account. Then any event created via Sesh syncs.
+  1008→
+  1009→## 11.6 Custom AI Bot (Overview)
+  1010→
+  1011→We will build a bot (details in Part 18) that responds to slash commands and can search internal docs. For now, we can use a pre-built bot like **ChatGPT Discord Bot** (with enterprise privacy concerns). We’ll build custom.
+  1012→
+  1013→---
+  1014→
+  1015→# PART 12 – KNOWLEDGE MANAGEMENT
+  1016→
+  1017→## 12.1 Pinned Messages as Quick References
+  1018→
+  1019→Each channel can have up to 50 pinned messages. Use sparingly; pin only the most important links or guidelines.
+  1020→
+  1021→**Policy:** A pinned message should have:
+  1022→- A clear title
+  1023→- Brief description
+  1024→- Link to full documentation (Notion/Confluence).
+  1025→
+  1026→## 12.2 Wiki Channels
+  1027→
+  1028→We can create a `#wiki` channel where only certain roles can post, and use Discord’s **Threads** to organize pages. Better: use Forum channel `📚 Knowledge Base` where each post is a wiki article.
+  1029→
+  1030→## 12.3 Documentation Linking
+  1031→
+  1032→All company documentation should reside in a centralized tool like Notion; Discord links to it. We’ll create a channel `#documentation` with bot that announces updates.
+  1033→
+  1034→## 12.4 Meeting Notes
+  1035→
+  1036→Create a forum channel `📅 Meeting Notes` where after each meeting, a thread is created with template.
+  1037→- Template:
+  1038→  ```
+  1039→  **Meeting:** [Name]
+  1040→  **Date:** [Date]
+  1041→  **Attendees:** @...
+  1042→  **Decisions:**
+  1043→  - ...
+  1044→  **Action Items:**
+  1045→  - [ ] ...
+  1046→  ```
+  1047→
+  1048→## 12.5 Decision Logs
+  1049→
+  1050→In the same forum, use tag `decision` to record key decisions.
+  1051→
+  1052→---
+  1053→
+  1054→# PART 13 – OPERATIONS: DAILY STANDUPS, SPRINTS, INCIDENTS
+  1055→
+  1056→## 13.1 Async Daily Standups
+  1057→
+  1058→Use a bot like **Standup.ly** or **Carl-bot** with custom commands? We’ll use **Standup Bot** (standupbot.com) integration. It sends a DM to each team member at a set time, asks questions, and posts a summary in `#eng-standup`. Alternatively, we can set a recurring webhook with a form.
+  1059→
+  1060→**Process:**
+  1061→1. Bot DMs engineer at 9:30 AM: “What did you do yesterday? What will you do today? Any blockers?”
+  1062→2. Responses compiled into a thread in #eng-standup for that date.
+  1063→3. Team can discuss in thread.
+  1064→
+  1065→## 13.2 Sprint Planning & Retrospectives
+  1066→
+  1067→Use a voice channel with screen sharing for planning. No special bot; but we can integrate Jira to show board. Or use **Polly** bot for anonymous retro surveys.
+  1068→
+  1069→## 13.3 Incident Response Procedure
+  1070→
+  1071→We’ll define an SOP in Part 23. In Discord:
+  1072→- Dedicated role `Incident Commander` (rotated).
+  1073→- Channel `#incident-alerts` (monitoring posts here).
+  1074→- A bot command `/incident start <severity>` will:
+  1075→  - Create a private channel `#inc-<id>` under INCIDENTS category (maybe hidden).
+  1076→  - Notify Incident Commander role.
+  1077→  - Post in #incident-alerts.
+  1078→- Integration with PagerDuty via webhook.
+  1079→
+  1080→## 13.4 Leave Requests & WFH
+  1081→
+  1082→Custom bot (Part 18) or use a form. Users type `/leave start end reason` in `#ops-leaves`. Bot posts an embed, HR can approve with emoji. Notifies manager.
+  1083→
+  1084→## 13.5 Holiday Calendar
+  1085→
+  1086→Use Sesh to create recurring events and post in #calendar. Employees can react to indicate participation.
+  1087→
+  1088→---
+  1089→
+  1090→# PART 14 – HR CONFIGURATION
+  1091→
+  1092→## 14.1 Recruitment & Interview Coordination
+  1093→
+  1094→Private category HR contains:
+  1095→- `#recruitment` – job postings, candidate discussions.
+  1096→- `#interview-scheduling` – using bot to coordinate times.
+  1097→- `#onboarding` (private) – HR-only checklist for new hires.
+  1098→
+  1099→**Channel Settings:** Write-restricted to HR and Hiring Managers (we’ll create role `Hiring Manager` assigned to dept. heads).
+  1100→
+  1101→## 14.2 Employee Records
+  1102→
+  1103→Discord is not an HRMS. Do not store sensitive personal data. Instead, link to HR system. Bot can retrieve employee directory info from HRMS (API) and display in Discord via slash command `/whois @user`.
+  1104→
+  1105→## 14.3 Policies and Handbook
+  1106→
+  1107→Channel `#company-policies` under INFORMATION (read-only). HR posts updates; employees can react if they’ve read (acknowledge via rule screening when updated).
+  1108→
+  1109→## 14.4 Private HR Channels Access Control
+  1110→
+  1111→Only HR role and Admin can see. No one else. Strict.
+  1112→
+  1113→---
+  1114→
+  1115→# PART 15 – MANAGEMENT & LEADERSHIP
+  1116→
+  1117→## 15.1 Leadership Category
+  1118→
+  1119→Channels:
+  1120→- `#strategy` – long-term plans.
+  1121→- `#budget` – financial discussions.
+  1122→- `#board-prep` – board meeting materials.
+  1123→- `#exec-announcements` – leadership-only announcements (can be cross-posted to #announcements later).
+  1124→
+  1125→**Permissions:** Leadership role only.
+  1126→
+  1127→## 15.2 Roadmaps & Planning
+  1128→
+  1129→Use a forum `📊 Roadmaps` visible to all but only managers can post. Threads per initiative.
+  1130→
+  1131→---
+  1132→
+  1133→# PART 16 – SECURITY
+  1134→
+  1135→## 16.1 AutoMod (Built-in)
+  1136→
+  1137→Discord AutoMod automatically blocks messages containing custom keywords, spam, and mentions. Configuration under Server Settings → **AutoMod**.
+  1138→
+  1139→- **Mention Spam Filter:** Enable, set to moderate (block messages with >10 mentions in 30 sec, send alert).
+  1140→- **Commonly Flagged Words:** We’ll add custom words if needed (profanity, sensitive project codenames to prevent accidental leak). But use sparingly.
+  1141→- **Block Custom Words:** e.g., confidential project names if not intended for all. However, rely on channel permissions.
+  1142→
+  1143→## 16.2 Raid Protection
+  1144→
+  1145→Enforced via phone verification and membership screening. Also, in Moderation settings, enable “Require members to accept rules before they can talk or DM” (already via screening). Plus, we can set @everyone deny Send Messages until they get roles; new unverified members can’t spam.
+  1146→
+  1147→## 16.3 Bot Permissions Security
+  1148→
+  1149→- Never give a bot Administrator unless absolutely necessary.
+  1150→- Restrict bot roles to only required permissions.
+  1151→- Regularly audit bot integrations (Monthly checklist).
+  1152→
+  1153→## 16.4 OAuth2 and Invite Security
+  1154→
+  1155→- Only admin can create invites. We earlier set Create Invite to Admin only. That’s secure.
+  1156→- Disable “Public Server” in Community settings.
+  1157→
+  1158→## 16.5 2FA Requirement for Admins
+  1159→
+  1160→Require all users with Admin role to have Discord two-factor authentication enabled. Enforce via Server Settings → **Moderation** → **Enable 2FA Requirement for Moderation** (which applies to members with moderation permissions). Enable it. This forces admins and mods to have 2FA.
+  1161→
+  1162→## 16.6 Admin Policies
+  1163→
+  1164→- Admin accounts must use strong, unique passwords and 2FA.
+  1165→- Only two people hold Admin role; CTO and IT lead.
+  1166→- Do not share admin account.
+  1167→
+  1168→## 16.7 Audit Logging & Alerting
+  1169→
+  1170→Using Logger bot (Carl-bot) we forward log events to #admin-logs. Set up keyword alerts for role creation, permission changes, bot invites. If possible, integrate with a SIEM via webhook.
+  1171→
+  1172→## 16.8 Backup and Disaster Recovery
+  1173→
+  1174→Discord server settings can be backed up via **Server Templates**. We’ll create a template weekly:
+  1175→- Server Settings → **Server Template** → Generate template. Copy link, store securely.
+  1176→- Template includes channel structure, roles, permissions, but not messages or members.
+  1177→- For message backup, use a bot like **Xenon** but data privacy concerns; instead, rely on logging bot that exports messages to Elasticsearch (custom). For critical channels, we can manually archive with a bot that dumps chat to a JSON file (Python script).
+  1178→
+  1179→## 16.9 Least Privilege Review
+  1180→
+  1181→Quarterly, review all role permissions; remove any unnecessary access.
+  1182→
+  1183→---
+  1184→
+  1185→# PART 17 – MODERATION
+  1186→
+  1187→## 17.1 Moderation SOP
+  1188→
+  1189→**Moderator Responsibilities:**
+  1190→- Ensure conversations stay respectful.
+  1191→- Remove spam, offensive content.
+  1192→- Warn users via DM first, then timeout, then escalate to HR/Admin.
+  1193→
+  1194→**Tools:** Carl-bot mod commands:
+  1195→- `!warn @user reason` – logs warning.
+  1196→- `!mute @user 10m reason` – timeout.
+  1197→- `!clean 100` – delete last 100 messages (in case of spam).
+  1198→
+  1199→## 17.2 Escalation Matrix
+  1200→
+  1201→| Level | Action | Perpetrator |
+  1202→|-------|--------|-------------|
+  1203→| Minor (off-topic, mild) | Verbal warning via DM or reply | Moderator |
+  1204→| Repeated minor | Formal warning logged, timeout 1h | Moderator |
+  1205→| Harassment, hate speech | Immediate ban, report to HR | Admin/HR |
+  1206→| Leak of confidential info | Delete messages, investigate, HR decision | Admin/Leadership |
+  1207→
+  1208→## 17.3 Message Cleanup
+  1209→
+  1210→Use `!clean` or Discord’s built-in bulk delete (right-click message → Delete Messages). Only mods can bulk delete.
+  1211→
+  1212→## 17.4 Conflict Handling
+  1213→
+  1214→If a heated discussion occurs, moderator may lock the channel (`!lock`) to cool down, then unlock after resolution.
+  1215→
+  1216→---
+  1217→
+  1218→# PART 18 – CUSTOM DISCORD APPS
+  1219→
+  1220→## 18.1 Architecture Overview
+  1221→
+  1222→We’ll build a custom Discord bot in Python (using discord.py) or Node.js (discord.js) that integrates with internal APIs.
+  1223→
+  1224→**Functionalities:**
+  1225→- Attendance tracking (via bot command /checkin, /checkout) – records in database.
+  1226→- Leave management (interact with HRMS via API) – employees can apply, managers approve.
+  1227→- Meeting room booking (check availability via Google Calendar and reserve) – voice channel integration? Maybe just inform.
+  1228→- Office dashboard (who’s in office? hybrid status).
+  1229→- AI Assistant (internal GPT with RAG).
+  1230→- Knowledge search (slash command queries indexed company docs).
+  1231→- Employee directory lookup.
+  1232→- Project dashboard summary from Jira/GitHub.
+  1233→- Analytics.
+  1234→
+  1235→**Bot Deployment:** Host on internal server or cloud (AWS ECS). Use Discord bot token stored securely (AWS Secrets Manager). Ensure bot has only needed permissions.
+  1236→
+  1237→## 18.2 Slash Command Design
+  1238→
+  1239→Example `/leave request dates:2026-07-10 2026-07-12 reason:vacation` → Bot posts embed in #ops-leaves, tags manager.
+  1240→
+  1241→## 18.3 AI Assistant Integration
+  1242→
+  1243→Connect bot to internal LLM API (e.g., OpenAI, or self-hosted). Use retrieval-augmented generation (RAG) to search Notion docs. The bot provides answers in a thread.
+  1244→
+  1245→## 18.4 Project Dashboard
+  1246→
+  1247→Command `/project status <project-key>` returns embed with info from Jira/GitHub.
+  1248→
+  1249→---
+  1250→
+  1251→# PART 19 – AI INTEGRATION DETAILS
+  1252→
+  1253→## 19.1 Internal GPT Setup
+  1254→
+  1255→- Use a custom bot that listens to `@AI Assistant` mention or slash `/ask`.
+  1256→- The bot sends query to Azure OpenAI or GPT-4o endpoint with system prompt restricting to company context.
+  1257→- RAG: Ingest all company documentation (via Notion API) into a vector database (Pinecone/Weaviate). Bot retrieves top-k chunks and includes as context.
+  1258→- Fallback: “I don’t know” if no relevant docs.
+  1259→
+  1260→## 19.2 GitHub/Jira Search
+  1261→
+  1262→Commands: `/github-search query`, `/jira-search query`. Bot uses respective APIs.
+  1263→
+  1264→## 19.3 Meeting Summaries
+  1265→
+  1266→After a meeting, a bot could join voice (with permission) and transcribe, but legal issues; instead, integrate with meeting tool (Google Meet) transcripts and post summary.
+  1267→
+  1268→## 19.4 Agent Workflows & MCP Integrations
+  1269→
+  1270→Discord’s Model Context Protocol (MCP) allows bots to function as agents that can use tools. We could build an agent that:
+  1271→- Creates a GitHub issue when asked.
+  1272→- Updates Jira ticket.
+  1273→- Sends announcement.
+  1274→But this requires careful safety rails. Start simple with slash commands.
+  1275→
+  1276→---
+  1277→
+  1278→# PART 20 – ANALYTICS
+  1279→
+  1280→## 20.1 Server Insights
+  1281→
+  1282→Discord provides **Server Insights** if Community enabled and server reaches 500 members? Not needed. We’ll use Statbot for stats:
+  1283→- Member count, message activity per channel, top posters.
+  1284→- Dashboard at statbot.net.
+  1285→
+  1286→## 20.2 Employee Engagement Metrics
+  1287→
+  1288→We can track:
+  1289→- Messages sent per user (via bot logs, aggregated).
+  1290→- Voice channel minutes (via bot that tracks presence).
+  1291→- Reactions to announcements.
+  1292→- But beware of surveillance culture. Use only aggregate, anonymized.
+  1293→
+  1294→## 20.3 Meeting Attendance
+  1295→
+  1296→Bot Sesh tracks RSVPs.
+  1297→
+  1298→---
+  1299→
+  1300→# PART 21 – MAINTENANCE CHECKLISTS
+  1301→
+  1302→## 21.1 Weekly Checklist (Admin/Mod)
+  1303→
+  1304→- [ ] Review #admin-logs for unusual actions.
+  1305→- [ ] Check invite usage (Audit Log) – any unexpected joins.
+  1306→- [ ] Purge inactive threads (manually or bot).
+  1307→- [ ] Ensure backups (template) generated.
+  1308→- [ ] Test key bot commands (Carl-bot welcome, ticket tool).
+  1309→- [ ] Announce any maintenance in #announcements.
+  1310→
+  1311→## 21.2 Monthly Checklist
+  1312→
+  1313→- [ ] Audit role permissions – anyone has extra powers?
+  1314→- [ ] Review bot permissions, remove unused bots.
+  1315→- [ ] Check integration webhooks (GitHub, Jira) – still working.
+  1316→- [ ] Clean up channels: archive channels not used in 30 days.
+  1317→- [ ] Update rules/policies if changed.
+  1318→- [ ] Verify 2FA enforcement.
+  1319→
+  1320→## 21.3 Quarterly Review
+  1321→
+  1322→- [ ] Full permission audit (export role settings, compare).
+  1323→- [ ] Review category structure – need new departments?
+  1324→- [ ] Employee survey on Discord experience.
+  1325→- [ ] Update documentation in Knowledge Base forum.
+  1326→- [ ] Test disaster recovery: restore from template on a test server.
+  1327→- [ ] Review bot code/API keys rotation.
+  1328→
+  1329→---
+  1330→
+  1331→# PART 22 – SCALING TO LARGER TEAMS
+  1332→
+  1333→## 22.1 Scaling to 50 Employees
+  1334→
+  1335→Current design works. Ensure role management is automated via bot to avoid manual overhead. Introduce additional department categories as needed.
+  1336→
+  1337→## 22.2 100 Employees
+  1338→
+  1339→- Introduce **sub-department roles** (e.g., Frontend, Backend) with separate channels.
+  1340→- Use **private threads** for cross-team collaboration instead of creating many channels.
+  1341→- Consider adding a second server for social/community if the main becomes too noisy, but not recommended.
+  1342→- Bot performance may need upgrading (self-host).
+  1343→
+  1344→## 22.3 250 Employees
+  1345→
+  1346→- Multiple Discord servers? “Augment Infotech” main, plus “Augment Engineering” for engineering sub-org? Better to keep one server with extensive use of forums and threads to prevent channel clutter.
+  1347→- Implement **tiered support** for HR/IT tickets with multiple ticket panels.
+  1348→- Formalize governance roles (Community Manager) to oversee server health.
+  1349→
+  1350→## 22.4 500–1000 Employees
+  1351→
+  1352→- Discord’s 500,000 member limit is far, but you’ll hit channel clutter. Use a **server template** for project-specific temporary servers (e.g., for a hackathon). Use **Discord’s Linked Roles** (bot-assigned) for fine-grained access.
+  1353→- Implement SSO-like bot that verifies identity against company directory before allowing access (custom bot auto-kicks unrecognized).
+  1354→- Dedicated moderation team.
+  1355→
+  1356→---
+  1357→
+  1358→# PART 23 – PROFESSIONAL SOP LIBRARY
+  1359→
+  1360→## 23.1 New Employee Onboarding SOP (already described)
+  1361→
+  1362→## 23.2 New Project Creation SOP
+  1363→
+  1364→1. Project lead requests a new channel via ticket (HR/IT).
+  1365→2. Admin creates a forum post in `📋 Project Discussions` or a new text channel under appropriate category.
+  1366→3. Set up role if cross-department, grant permissions.
+  1367→4. Create GitHub/Jira integration.
+  1368→5. Announce in #announcements.
+  1369→
+  1370→## 23.3 Incident Response SOP
+  1371→
+  1372→1. Alert from monitoring → #incident-alerts pings @Incident Commander.
+  1373→2. Commander clicks button or uses `/incident start` to create private incident channel and voice room.
+  1374→3. Commander assigns roles: Scribe, Liaison.
+  1375→4. Status updates posted in incident channel, synced to #incident-alerts.
+  1376→5. Postmortem in forum `📋 Postmortems` after resolution.
+  1377→
+  1378→## 23.4 Production Deployment SOP
+  1379→
+  1380→1. Release manager merges to main → CI/CD builds.
+  1381→2. GitHub bot posts to `#deployments` that deployment started.
+  1382→3. After health checks, bot posts success/failure.
+  1383→4. If failure, trigger rollback and notify in `#deployments`.
+  1384→5. Release notes auto-posted via bot in `#releases`.
+  1385→
+  1386→## 23.5 Leave Request SOP
+  1387→
+  1388→1. Employee uses `/leave` command in `#ops-leaves`.
+  1389→2. Bot posts embed; manager reacts with ✅ to approve, ❌ to deny.
+  1390→3. Approved leave added to HRMS via API, and calendar event created.
+  1391→4. Announcement in `#ops-leaves` for visibility (only dates, no reason).
+  1392→
+  1393→## 23.6 HR Announcement SOP
+  1394→
+  1395→1. HR drafts announcement in `#hr-announcements` (private).
+  1396→2. Leadership reviews.
+  1397→3. Post in `#announcements` with @Employee mention.
+  1398→4. Pin if critical.
+  1399→
+  1400→## 23.7 Emergency Communication SOP
+  1401→
+  1402→1. Use `@everyone` in `#announcements` only for emergencies (server outage, office closure).
+  1403→2. Pre-draft messages for known scenarios.
+  1404→3. Follow-up with email.
+  1405→
+  1406→## 23.8 Town Hall SOP
+  1407→
+  1408→1. Schedule via Sesh, post in #announcements and #calendar.
+  1409→2. Create Stage channel with moderators.
+  1410→3. Collect questions via forum `❓ Town Hall Q&A` (anonymous via bot?).
+  1411→4. Record meeting (Craig bot) with notification.
+  1412→5. Post recording link in #announcements.
+  1413→
+  1414→## 23.9 Meeting Etiquette SOP
+  1415→
+  1416→- Use push-to-talk if background noise.
+  1417→- Mute when not speaking.
+  1418→- Use threads to share links during meeting in text channel.
+  1419→- Be on time.
+  1420→
+  1421→## 23.10 Knowledge Documentation SOP
+  1422→
+  1423→- To document a process, create a post in `📚 Knowledge Base` with appropriate tags.
+  1424→- Include step-by-step, screenshots.
+  1425→- Request review from peers.
+  1426→- Pin in relevant channel if needed.
+  1427→
+  1428→## 23.11 Project Closure SOP
+  1429→
+  1430→- Archive project channel (move to ARCHIVE category).
+  1431→- Post final report in `📋 Project Discussions`.
+  1432→- Remove project-specific role if any.
+  1433→
+  1434→---
+  1435→
+  1436→# PART 24 – TEMPLATES
+  1437→
+  1438→## 24.1 Welcome Message (Carl-bot)
+  1439→
+  1440→```
+  1441→:wave: Welcome {user} to Augment Infotech! We're excited to have you.
+  1442→Please:
+  1443→- Read the {#rules}
+  1444→- Introduce yourself in {#introductions}
+  1445→- Check out {#onboarding} for next steps.
+  1446→If you need help, ask in {#general} or create a ticket in {#support}.
+  1447→```
+  1448→
+  1449→## 24.2 Announcement Template (Post in #announcements)
+  1450→
+  1451→```
+  1452→**Subject:** [Title]
+  1453→**Date:** [Date]
+  1454→**Audience:** @everyone / @Employee
+  1455→**Body:**
+  1456→[Concise details]
+  1457→
+  1458→**Action Required:** [If any]
+  1459→```
+  1460→
+  1461→## 24.3 Leave Request Embed (Bot Output)
+  1462→
+  1463→```
+  1464→**Leave Request**
+  1465→**Employee:** @user
+  1466→**Dates:** 2026-07-10 to 2026-07-12
+  1467→**Type:** Vacation
+  1468→**Reason:** (optional)
+  1469→React ✅ to approve, ❌ to deny.
+  1470→```
+  1471→
+  1472→## 24.4 Bug Report Template (Forum)
+  1473→
+  1474→```
+  1475→**Title:** [Bug] Short description
+  1476→**Environment:** OS, browser, version
+  1477→**Steps to Reproduce:**
+  1478→1.
+  1479→2.
+  1480→**Expected:** ...
+  1481→**Actual:** ...
+  1482→**Attachments:** screenshots
+  1483→```
+  1484→
+  1485→## 24.5 Incident Report Template (Postmortem)
+  1486→
+  1487→```
+  1488→**Incident ID:** INC-001
+  1489→**Date:** ...
+  1490→**Duration:** ...
+  1491→**Impact:** ...
+  1492→**Root Cause:** ...
+  1493→**Resolution:** ...
+  1494→**Action Items:** ...
+  1495→```
+  1496→
+  1497→## 24.6 Meeting Notes Template
+  1498→
+  1499→```
+  1500→**Meeting:** ...
+  1501→**Date:** ...
+  1502→**Attendees:** @...
+  1503→**Agenda:**
+  1504→- ...
+  1505→**Decisions:**
+  1506→- ...
+  1507→**Action Items:**
+  1508→- [ ] Assignee: Task
+  1509→```
+  1510→
+  1511→## 24.7 Standup Thread Template
+  1512→
+  1513→```
+  1514→**Standup - 2026-07-01**
+  1515→Please reply with:
+  1516→- Yesterday:
+  1517→- Today:
+  1518→- Blockers:
+  1519→```
+  1520→
+  1521→## 24.8 Retrospective Template
+  1522→
+  1523→```
+  1524→**Sprint Retro - Sprint X**
+  1525→**What went well?**
+  1526→**What could be improved?**
+  1527→**Action items:**
+  1528→```
+  1529→
+  1530→## 24.9 Project Kickoff Post
+  1531→
+  1532→```
+  1533→**Project:** [Name]
+  1534→**Lead:** @...
+  1535→**Team:** @...
+  1536→**Goal:** ...
+  1537→**Timeline:** ...
+  1538→**Communication Channel:** #project-...
+  1539→**First Meeting:** ...
+  1540→```
+  1541→
+  1542→## 24.10 Release Notes
+  1543→
+  1544→```
+  1545→**Release v1.2.0** 
+  1546→**Date:** ...
+  1547→**Features:** ...
+  1548→**Bug Fixes:** ...
+  1549→**Breaking Changes:** ...
+  1550→**Deployment Status:** :green_circle:
+  1551→```
+  1552→
+  1553→## 24.11 Policy Update
+  1554→
+  1555→```
+  1556→**Policy Update:** [Policy Name]
+  1557→**Effective Date:** ...
+  1558→**Summary of Changes:** ...
+  1559→**Full Document:** [Link]
+  1560→Please acknowledge by reacting with :thumbsup:.
+  1561→```
+  1562→
+  1563→## 24.12 Hiring Post (HR Recruitment Channel)
+  1564→
+  1565→```
+  1566→**Position:** ...
+  1567→**Department:** ...
+  1568→**Description:** ...
+  1569→**How to Apply:** ...
+  1570→```
+  1571→
+  1572→## 24.13 Interview Feedback Template
+  1573→
+  1574→```
+  1575→**Candidate:** [Name]
+  1576→**Position:** ...
+  1577→**Interviewer:** @...
+  1578→**Rating:** ...
+  1579→**Strengths:** ...
+  1580→**Weaknesses:** ...
+  1581→**Recommendation:** Hire / No Hire
+  1582→```
+  1583→
+  1584→---
+  1585→
+  1586→# PART 25 – FINAL REVIEW & GO-LIVE CHECKLISTS
+  1587→
+  1588→## 25.1 Complete Implementation Checklist
+  1589→
+  1590→- [ ] Server created, named, branded.
+  1591→- [ ] Verification level: Highest.
+  1592→- [ ] Community enabled, Discovery off, Welcome Screen designed.
+  1593→- [ ] All roles created with proper hierarchy and colors.
+  1594→- [ ] Permission matrix applied globally.
+  1595→- [ ] Categories created with correct privacy.
+  1596→- [ ] All channels created as specified, with topics and first messages.
+  1597→- [ ] Onboarding flow configured (rules screening, role selection).
+  1598→- [ ] Invite link secured.
+  1599→- [ ] Bots invited and configured (Carl-bot, Ticket Tool, Sesh, Statbot, etc.).
+  1600→- [ ] GitHub/Jira integrations working.
+  1601→- [ ] Webhooks set up for CI/CD.
+  1602→- [ ] AutoMod configured.
+  1603→- [ ] 2FA enforcement enabled.
+  1604→- [ ] Logging channels private.
+  1605→- [ ] Knowledge forums structured.
+  1606→- [ ] Templates and welcome messages ready.
+  1607→- [ ] SOPs documented and accessible.
+  1608→- [ ] Backup template created.
+  1609→
+  1610→## 25.2 Server Audit Checklist
+  1611→
+  1612→- [ ] Admin role assigned only to CTO and IT lead.
+  1613→- [ ] No other role has Administrator.
+  1614→- [ ] @everyone has minimal permissions (Deny Send Messages, etc.).
+  1615→- [ ] Private categories tested – non-members see nothing.
+  1616→- [ ] Departing employee process tested.
+  1617→- [ ] Bot permissions limited.
+  1618→
+  1619→## 25.3 Security Checklist
+  1620→
+  1621→- [ ] 2FA required for moderation.
+  1622→- [ ] Phone verification enforced.
+  1623→- [ ] Invite creation restricted to admin.
+  1624→- [ ] Webhook URLs not leaked (secured).
+  1625→- [ ] Bot tokens stored in secret manager, not in code.
+  1626→- [ ] Audit log forwarding active.
+  1627→- [ ] AutoMod filters appropriate.
+  1628→
+  1629→## 25.4 Operational Readiness Checklist
+  1630→
+  1631→- [ ] HR has training on Ticket Tool and onboarding.
+  1632→- [ ] Managers know how to use standup bot.
+  1633→- [ ] Employees aware of channel etiquette.
+  1634→- [ ] Incident response flow tested with drill.
+  1635→- [ ] Deployment notifications verified.
+  1636→- [ ] Calendar events synced.
+  1637→- [ ] All integration tokens have fallback contacts.
+  1638→
+  1639→## 25.5 Go-Live Checklist
+  1640→
+  1641→- [ ] Announce to company: “WhatsApp groups will be archived on [date].”
+  1642→- [ ] Send Discord invite link to all employees.
+  1643→- [ ] Schedule an all-hands orientation in Town Hall stage.
+  1644→- [ ] Have IT support stand by for first day.
+  1645→- [ ] Monitor server activity.
+  1646→- [ ] Collect feedback after one week.
+  1647→
+  1648→## 25.6 Post-Launch Improvement Roadmap
+  1649→
+  1650→- Month 1: Tweak channel structure based on usage.
+  1651→- Month 2: Integrate custom bot features (leave, directory).
+  1652→- Month 3: AI assistant beta.
+  1653→- Month 6: Advanced analytics and automation.
+  1654→- Year 1: Evaluate scaling architecture, consider server segmentation for 100+.
+  1655→
+  1656→---
+  1657→
+  1658→# CLOSING
+  1659→
+  1660→This handbook provides a complete, enterprise-grade Discord implementation for Augment Infotech. Follow each section meticulously, and you will transform Discord into a secure, efficient, and engaging company operating system that far surpasses WhatsApp. The result will be a central hub that fosters transparency, accelerates collaboration, and scales with your business.
+  1661→
+  1662→**Remember:** The secret is not the tools but the discipline in using them. With clear roles, structured channels, and automated workflows, your team will communicate with precision and purpose.
+  1663→
+  1664→*End of Handbook*
