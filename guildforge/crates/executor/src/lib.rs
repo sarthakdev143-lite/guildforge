@@ -313,12 +313,25 @@ impl Executor {
 
             // After a successful Create, record the resource ID for
             // categories so channels can reference them.
+            // We need to read the state to get the category's Discord ID.
             if result.is_ok() {
-                if let guildforge_planner::Operation::Create { desired } = &op {
-                    if let guildforge_provider::Resource::Category(cat) = desired {
-                        if let Some(id) = cat.id {
-                            let mut ids = category_ids.lock().await;
-                            ids.insert(cat.name.clone(), id.to_string());
+                // Check if this was a category creation by looking at
+                // the state we just wrote.
+                let state_result = tx.current_state().await;
+                if let Ok(state) = state_result {
+                    if let guildforge_planner::Operation::Create { desired } = &op {
+                        if let guildforge_provider::Resource::Category(_) = desired {
+                            // Look up the resource we just saved to get its ID.
+                            if let Some(rec) = state.resources.get(&addr) {
+                                if let Ok(resource) = rec.to_resource() {
+                                    if let guildforge_provider::Resource::Category(cat) = resource {
+                                        if let Some(id) = cat.id {
+                                            let mut ids = category_ids.lock().await;
+                                            ids.insert(cat.name.clone(), id.to_string());
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
