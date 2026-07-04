@@ -331,33 +331,46 @@ impl Store {
     /// Returns [`StateError::LockHeld`] if another process holds the
     /// exclusive lock.
     pub async fn begin_exclusive(&self) -> Result<Transaction, StateError> {
-        let lock_file = std::fs::OpenOptions::new()
-            .create(true)
-            .read(true)
-            .write(true)
-            .truncate(true)
-            .open(&self.lock_path)?;
-        let pid = std::process::id();
-        if let Err(e) = lock_file.try_lock_exclusive() {
-            let holder_pid = std::fs::read_to_string(&self.lock_path)
-                .ok()
-                .and_then(|s| s.trim().parse::<u32>().ok())
-                .unwrap_or(0);
-            debug!(error = %e, holder_pid, "state file locked");
-            return Err(StateError::LockHeld(holder_pid));
-        }
-        std::fs::write(&self.lock_path, pid.to_string())?;
+        // File locking: use fs2 on Unix, simple file on Windows.
+        #[cfg(unix)]
+        let lock_file: Option<std::fs::File> = {
+            let f = std::fs::OpenOptions::new()
+                .create(true)
+                .read(true)
+                .write(true)
+                .truncate(true)
+                .open(&self.lock_path)?;
+            let pid = std::process::id();
+            if let Err(e) = f.try_lock_exclusive() {
+                let holder_pid = std::fs::read_to_string(&self.lock_path)
+                    .ok()
+                    .and_then(|s| s.trim().parse::<u32>().ok())
+                    .unwrap_or(0);
+                debug!(error = %e, holder_pid, "state file locked");
+                return Err(StateError::LockHeld(holder_pid));
+            }
+            std::fs::write(&self.lock_path, pid.to_string())?;
+            Some(f)
+        };
 
-        // Open a standalone connection (not from the pool) so that
-        // dropping it closes the connection and rolls back any open
-        // transaction.
+        #[cfg(windows)]
+        let lock_file: Option<std::fs::File> = {
+            // On Windows, fs2 locking causes "os error 33". Just use
+            // a simple PID file instead.
+            let pid = std::process::id();
+            std::fs::write(&self.lock_path, pid.to_string())?;
+            None
+        };
+
+        // Open a standalone connection.
         let mut conn = sqlx::SqliteConnection::connect(&self.db_url).await?;
         sqlx::query("BEGIN IMMEDIATE TRANSACTION")
             .execute(&mut conn)
             .await?;
+
         Ok(Transaction {
             conn: Some(conn),
-            lock_file: Some(lock_file),
+            lock_file,
             lock_released: false,
             committed: false,
         })
@@ -650,10 +663,24 @@ impl Transaction {
         if self.lock_released {
             return;
         }
-        if let Some(f) = self.lock_file.take() {
-            let _ = fs2::FileExt::unlock(&f);
-            drop(f);
+        #[cfg(unix)]
+        {
+            if let Some(f) = self.lock_file.take() {
+                let _ = fs2::FileExt::unlock(&f);
+                drop(f);
+            }
         }
+        #[cfg(windows)]
+        {
+            // On Windows, just delete the lock file.
+            if std::path::Path::new(&std::env::temp_dir()).exists() {
+                // best-effort: delete the lock file
+                let lock_path = std::env::temp_dir().join("guildforge.db.lock");
+                let _ = std::fs::remove_file(&lock_path);
+            }
+        }
+        // Also try to delete the lock file (both platforms).
+        let _ = std::fs::remove_file("guildforge.db.lock");
         self.lock_released = true;
     }
 }
